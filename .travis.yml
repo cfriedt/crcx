@@ -1,0 +1,32 @@
+dist: bionic
+
+sudo: false
+
+language:
+  - cpp
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - cmake
+      - clang
+      - clang-tidy
+      - gcovr
+      - graphviz
+      - doxygen
+
+before_script:
+  - sudo sh .scripts/build-and-install-libgtest-libraries.sh
+
+script:
+  - make -j`nproc --all`
+  - make check
+  - make doc
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+
+notifications:
+  email: false
