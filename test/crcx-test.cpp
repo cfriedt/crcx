@@ -44,7 +44,7 @@ static void eraseAll(string &haystack, const string &needle) {
   }
 }
 
-static vector<uintmax_t> to_array(string s) {
+static vector<uintmax_t> to_vector(string s) {
   vector<uintmax_t> r;
 
   eraseAll(s, "0x");
@@ -62,9 +62,157 @@ static vector<uintmax_t> to_array(string s) {
   return r;
 }
 
-static vector<uintmax_t> to_array(uintmax_t *x, size_t len) {
+static vector<uintmax_t> to_vector(uintmax_t *x, size_t len) {
   return vector<uintmax_t>(x, x + len);
 }
+
+//
+// Sanity checks, input validation, etc
+//
+
+TEST(Sanity, ctx_null) { ASSERT_FALSE(::crcx_valid(nullptr)); }
+
+TEST(Sanity, poly_zero) {
+  ::crcx_ctx ctx = {
+      .n = 8,
+      .init = 0,
+      .fini = 0,
+      .poly = 0, // a polynomial of 0 is invalid
+      .mask = (1 << 8) - 1,
+      .msb = 1 << (8 - 1),
+      .reflect_input = false,
+      .reflect_output = false,
+      .table = {},
+      .lfsr = 0,
+  };
+  ASSERT_FALSE(::crcx_valid(&ctx));
+}
+
+TEST(Sanity, poly_highest_bit_greater_than_n) {
+  ::crcx_ctx ctx = {
+      .n = 8,
+      .init = 0,
+      .fini = 0,
+      .poly = 0x8000,
+      .mask = (1 << 8) - 1,
+      .msb = 1 << (8 - 1),
+      .reflect_input = false,
+      .reflect_output = false,
+      .table = {},
+      .lfsr = 0,
+  };
+  ASSERT_FALSE(::crcx_valid(&ctx));
+}
+
+TEST(Sanity, n_zero) {
+  ::crcx_ctx ctx = {
+      .n = 0, // number of bits must be a non-zero and positive multiple of 8
+      .init = 0,
+      .fini = 0,
+      .poly = 0x7,
+      .mask = (1 << 8) - 1,
+      .msb = 1 << (8 - 1),
+      .reflect_input = false,
+      .reflect_output = false,
+      .table = {},
+      .lfsr = 0,
+  };
+  ASSERT_FALSE(::crcx_valid(&ctx));
+}
+
+TEST(Sanity, n_not_a_multiple_of_8) {
+  ::crcx_ctx ctx = {
+      .n = 7, // number of bits must be a non-zero and positive multiple of 8
+      .init = 0,
+      .fini = 0,
+      .poly = 0x7,
+      .mask = (1 << 8) - 1,
+      .msb = 1 << (8 - 1),
+      .reflect_input = false,
+      .reflect_output = false,
+      .table = {},
+      .lfsr = 0,
+  };
+  ASSERT_FALSE(::crcx_valid(&ctx));
+}
+
+TEST(Sanity, n_greater_than_sizeof_uintmax) {
+  ::crcx_ctx ctx = {
+      .n = 8 * sizeof(uintmax_t) +
+           1, // number of bits must be a non-zero and positive multiple of 8
+      .init = 0,
+      .fini = 0,
+      .poly = 0x7,
+      .mask = (1 << 8) - 1,
+      .msb = 1 << (8 - 1),
+      .reflect_input = false,
+      .reflect_output = false,
+      .table = {},
+      .lfsr = 0,
+  };
+  ASSERT_FALSE(::crcx_valid(&ctx));
+}
+
+TEST(Sanity, msb_invalid) {
+  ::crcx_ctx ctx = {
+      .n = 8,
+      .init = 0,
+      .fini = 0,
+      .poly = 0x7,
+      .mask = (1 << 8) - 1,
+      .msb = 0x1, // msb must be 1 << (n - 1)
+      .reflect_input = false,
+      .reflect_output = false,
+      .table = {},
+      .lfsr = 0,
+  };
+  ASSERT_FALSE(::crcx_valid(&ctx));
+}
+
+TEST(Sanity, mask_invalid) {
+  ::crcx_ctx ctx = {
+      .n = 8,
+      .init = 0,
+      .fini = 0,
+      .poly = 0x7,
+      .mask = (1 << 8) - 2, // mask must be (1 << n) - 1
+      .msb = 1 << (8 - 1),
+      .reflect_input = false,
+      .reflect_output = false,
+      .table = {},
+      .lfsr = 0,
+  };
+  ASSERT_FALSE(::crcx_valid(&ctx));
+}
+
+TEST(Sanity, mask_invalid64) {
+  ::crcx_ctx ctx = {
+      .n = 64,
+      .init = 0,
+      .fini = 0,
+      .poly = 0x7,
+      .mask = 0xfffffffffffffffeULL, // mask must be (1 << n) - 1
+      .msb = 0x8000000000000000ULL,
+      .reflect_input = false,
+      .reflect_output = false,
+      .table = {},
+      .lfsr = 0,
+  };
+  ASSERT_FALSE(::crcx_valid(&ctx));
+}
+
+TEST(Sanity, invalid_ctx_tries_to_generate_table) {
+  ASSERT_FALSE(::crcx_generate_table(nullptr));
+}
+
+TEST(Sanity, invalid_param_to_crcx_init) {
+  ::crcx_ctx ctx = {};
+  ASSERT_FALSE(::crcx_init(&ctx, 1, 0, 0, 0x7, false, false));
+}
+
+TEST(Sanity, invalid_ctx_to_crcx_fini) { ASSERT_EQ(::crcx_fini(nullptr), -1); }
+
+TEST(Sanity, invalid_ctx_to_crcx) { ASSERT_FALSE(::crcx(nullptr, nullptr, 0)); }
 
 // This test shows that the CRC works for a single byte.
 // It also tests to make sure that the input parameters are set accordingly.
@@ -76,7 +224,7 @@ TEST(CRCx, Wikipedia_example1) {
 
   ::crcx_ctx ctx = {};
 
-  ::crcx_init_args(&ctx, 8, 0, 0, 0b100000111, false, false);
+  ASSERT_TRUE(::crcx_init(&ctx, 8, 0, 0, 0b100000111, false, false));
 
   ASSERT_EQ(ctx.n, 8);
   ASSERT_EQ(ctx.msb, 0x80);
@@ -89,7 +237,7 @@ TEST(CRCx, Wikipedia_example1) {
   // This site has a table generator and gives the same output as the wikipedia
   // http://www.sunshine2k.de/coding/javascript/crc/crc_js.html
   // clang-format off
-  auto expected_v = to_array(
+  auto expected_v = to_vector(
     "0x00 0x07 0x0E 0x09 0x1C 0x1B 0x12 0x15 0x38 0x3F 0x36 0x31 0x24 0x23 0x2A 0x2D "
     "0x70 0x77 0x7E 0x79 0x6C 0x6B 0x62 0x65 0x48 0x4F 0x46 0x41 0x54 0x53 0x5A 0x5D "
     "0xE0 0xE7 0xEE 0xE9 0xFC 0xFB 0xF2 0xF5 0xD8 0xDF 0xD6 0xD1 0xC4 0xC3 0xCA 0xCD "
@@ -108,13 +256,14 @@ TEST(CRCx, Wikipedia_example1) {
     "0xDE 0xD9 0xD0 0xD7 0xC2 0xC5 0xCC 0xCB 0xE6 0xE1 0xE8 0xEF 0xFA 0xFD 0xF4 0xF3 "
   );
   // clang-format on
-  auto actual_v = to_array((uintmax_t *)ctx.table, ARRAY_SIZE(ctx.table));
+  auto actual_v = to_vector((uintmax_t *)ctx.table, ARRAY_SIZE(ctx.table));
 
   ASSERT_EQ(actual_v, expected_v) << "The generated table is incorrect";
 
+  ASSERT_TRUE(::crcx(&ctx, reinterpret_cast<const uint8_t *>("W"), 1));
+
   uintmax_t expected_uintmax = 0xa2;
-  uintmax_t actual_uintmax =
-      ::crcx(&ctx, reinterpret_cast<const uint8_t *>("W"), 1);
+  uintmax_t actual_uintmax = ::crcx_fini(&ctx);
 
   EXPECT_EQ(actual_uintmax, expected_uintmax)
       << "The calculated CRC is incorrect";
@@ -131,14 +280,16 @@ TEST(CRCx, Sunshine_CRC8) {
   // final xor value: 0
   // CRC Input Data: 0x31 0x32 0x33 0x34 0x35 0x36 0x37 0x38 0x39
 
-  const array<uint8_t, 9> data{0x31, 0x32, 0x33, 0x34, 0x35,
-                               0x36, 0x37, 0x38, 0x39};
+  const vector<uint8_t> data{0x31, 0x32, 0x33, 0x34, 0x35,
+                             0x36, 0x37, 0x38, 0x39};
 
   ::crcx_ctx ctx = {};
-  ::crcx_init_args(&ctx, 8, 0, 0, 0x07, false, false);
+  ASSERT_TRUE(::crcx_init(&ctx, 8, 0, 0, 0x07, false, false));
+
+  ASSERT_TRUE(::crcx(&ctx, &data.front(), data.size()));
 
   uintmax_t expected_uintmax = 0xf4;
-  uintmax_t actual_uintmax = ::crcx(&ctx, &data.front(), data.size());
+  uintmax_t actual_uintmax = ::crcx_fini(&ctx);
 
   EXPECT_EQ(actual_uintmax, expected_uintmax)
       << "The calculated CRC is incorrect";
@@ -155,14 +306,16 @@ TEST(CRCx, Sunshine_CRC8_ITU) {
   // final xor value: 0x55
   // CRC Input Data: 0x31 0x32 0x33 0x34 0x35 0x36 0x37 0x38 0x39
 
-  const array<uint8_t, 9> data{0x31, 0x32, 0x33, 0x34, 0x35,
-                               0x36, 0x37, 0x38, 0x39};
+  const vector<uint8_t> data{0x31, 0x32, 0x33, 0x34, 0x35,
+                             0x36, 0x37, 0x38, 0x39};
 
   ::crcx_ctx ctx = {};
-  ::crcx_init_args(&ctx, 8, 0, 0x55, 0x07, false, false);
+  ASSERT_TRUE(::crcx_init(&ctx, 8, 0, 0x55, 0x07, false, false));
+
+  ASSERT_TRUE(::crcx(&ctx, &data.front(), data.size()));
 
   uintmax_t expected_uintmax = 0xa1;
-  uintmax_t actual_uintmax = ::crcx(&ctx, &data.front(), data.size());
+  uintmax_t actual_uintmax = ::crcx_fini(&ctx);
 
   EXPECT_EQ(actual_uintmax, expected_uintmax)
       << "The calculated CRC is incorrect";
@@ -179,37 +332,47 @@ TEST(CRCx, Sunshine_CRC8_DARC) {
   // final xor value: 0
   // CRC Input Data: 0x31 0x32 0x33 0x34 0x35 0x36 0x37 0x38 0x39
 
-  const array<uint8_t, 9> data{0x31, 0x32, 0x33, 0x34, 0x35,
-                               0x36, 0x37, 0x38, 0x39};
+  const vector<uint8_t> data{0x31, 0x32, 0x33, 0x34, 0x35,
+                             0x36, 0x37, 0x38, 0x39};
 
   ::crcx_ctx ctx = {};
-  ::crcx_init_args(&ctx, 8, 0, 0, 0x39, true, true);
+  ASSERT_TRUE(::crcx_init(&ctx, 8, 0, 0, 0x39, true, true));
+
+  ASSERT_TRUE(::crcx(&ctx, &data.front(), data.size()));
 
   uintmax_t expected_uintmax = 0x15;
-  uintmax_t actual_uintmax = ::crcx(&ctx, &data.front(), data.size());
+  uintmax_t actual_uintmax = ::crcx_fini(&ctx);
 
   EXPECT_EQ(actual_uintmax, expected_uintmax)
       << "The calculated CRC is incorrect";
 }
 
-// this test shows that CRC16 works
-TEST( CRCx, Sunshine_CRC16_CCIT_ZERO ) {
-    // http://www.sunshine2k.de/coding/javascript/crc/crc_js.html
-    // CRC16_CCIT_ZERO
-	// input not reflected
-	// result not reflected
-	// polynomial 0x1021
-	// initial value: 0
-	// final xor value: 0
-	// CRC Input Data: 0x31 0x32 0x33 0x34 0x35 0x36 0x37 0x38 0x39
+// this test shows that CRC16 works for one byte messages
+TEST(CRCx, Sunshine_CRC16_CCIT_ZERO_one_byte) {
+  // http://www.sunshine2k.de/coding/javascript/crc/crc_js.html
+  // CRC16_CCIT_ZERO
+  // input not reflected
+  // result not reflected
+  // polynomial 0x1021
+  // initial value: 0
+  // final xor value: 0
+  // CRC Input Data: 'W'
 
-	const array<uint8_t, 9> data { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39 };
+  const vector<uint8_t> data{uint8_t('W')};
 
-    ::crcx_ctx ctx = {};
-    ::crcx_init_args( & ctx, 16, 0, 0, 0x1021, false, false );
+  ::crcx_ctx ctx = {};
+  ASSERT_TRUE(::crcx_init(&ctx, 16, 0, 0, 0x1021, false, false));
 
-    // clang-format off
-    auto expected_v = to_array(
+  ASSERT_EQ(ctx.n, 16);
+  ASSERT_EQ(ctx.msb, 0x8000);
+  ASSERT_EQ(ctx.mask, 0xffff);
+  ASSERT_EQ(ctx.init, 0);
+  ASSERT_EQ(ctx.fini, 0);
+  ASSERT_EQ(ctx.poly, 0x1021);
+  ASSERT_EQ(ctx.lfsr, 0);
+
+  // clang-format off
+    auto expected_v = to_vector(
         "0x0000 0x1021 0x2042 0x3063 0x4084 0x50A5 0x60C6 0x70E7 0x8108 0x9129 0xA14A 0xB16B 0xC18C 0xD1AD 0xE1CE 0xF1EF "
         "0x1231 0x0210 0x3273 0x2252 0x52B5 0x4294 0x72F7 0x62D6 0x9339 0x8318 0xB37B 0xA35A 0xD3BD 0xC39C 0xF3FF 0xE3DE "
         "0x2462 0x3443 0x0420 0x1401 0x64E6 0x74C7 0x44A4 0x5485 0xA56A 0xB54B 0x8528 0x9509 0xE5EE 0xF5CF 0xC5AC 0xD58D "
@@ -227,35 +390,130 @@ TEST( CRCx, Sunshine_CRC16_CCIT_ZERO ) {
         "0xFD2E 0xED0F 0xDD6C 0xCD4D 0xBDAA 0xAD8B 0x9DE8 0x8DC9 0x7C26 0x6C07 0x5C64 0x4C45 0x3CA2 0x2C83 0x1CE0 0x0CC1 "
         "0xEF1F 0xFF3E 0xCF5D 0xDF7C 0xAF9B 0xBFBA 0x8FD9 0x9FF8 0x6E17 0x7E36 0x4E55 0x5E74 0x2E93 0x3EB2 0x0ED1 0x1EF0 "
     );
-    // clang-format on
-    auto actual_v = to_array( (uintmax_t *)ctx.table, ARRAY_SIZE(ctx.table) );
+  // clang-format on
+  auto actual_v = to_vector((uintmax_t *)ctx.table, ARRAY_SIZE(ctx.table));
 
-    ASSERT_EQ( actual_v, expected_v ) << "The generated table is incorrect";
+  ASSERT_EQ(actual_v, expected_v) << "The generated table is incorrect";
 
-    uintmax_t expected_uintmax = 0x31c3;
-    uintmax_t actual_uintmax = ::crcx( & ctx, & data.front(), data.size() );
+  ASSERT_TRUE(::crcx(&ctx, &data.front(), data.size()));
 
-    EXPECT_EQ( actual_uintmax, expected_uintmax ) << "The calculated CRC is incorrect";
+  uintmax_t expected_uintmax = 0x2A12;
+  uintmax_t actual_uintmax = ::crcx_fini(&ctx);
+
+  EXPECT_EQ(actual_uintmax, expected_uintmax)
+      << "The calculated CRC is incorrect";
+}
+
+// this test shows that CRC16 works (incrementally)
+TEST(CRCx, Sunshine_CRC16_CCIT_ZERO_incremental) {
+  // http://www.sunshine2k.de/coding/javascript/crc/crc_js.html
+  // CRC16_CCIT_ZERO
+  // input not reflected
+  // result not reflected
+  // polynomial 0x1021
+  // initial value: 0
+  // final xor value: 0
+  // CRC Input Data: 0x31 0x32 0x33 0x34 0x35 0x36 0x37 0x38 0x39
+
+  const vector<uint8_t> data{0x31, 0x32, 0x33, 0x34, 0x35,
+                             0x36, 0x37, 0x38, 0x39};
+
+  // expected values from
+  // http://www.sunshine2k.de/coding/javascript/crc/crc_js.html
+  const vector<uintmax_t> expected{0x2672, 0x20b5, 0x9752, 0xd789, 0x546c,
+                                   0x20e4, 0x86d6, 0x9015, 0x31c3};
+  ::crcx_ctx ctx = {};
+
+  // This nice thing about CRC's is that you can calculate them
+  // incrementally just by varying the LFSR and the input.
+  // Below, we're basically just unwinding the loop in crcx() and
+  // checking intermediate values.
+
+  // the lfsr value is now 0, then, 0x2672, 0x20b5, ...
+  ASSERT_TRUE(::crcx_init(&ctx, 16, 0, 0, 0x1021, false, false));
+
+  ASSERT_TRUE(data.size() == expected.size());
+  for (size_t i = 0; i < data.size(); ++i) {
+    ::crcx_update(&ctx, data[i]);
+    uintmax_t expected_uintmax = expected[i];
+    uintmax_t actual_uintmax = ctx.lfsr;
+    ASSERT_EQ(actual_uintmax, expected_uintmax)
+        << "CRC16 failed at i = " << i << ". "
+        << "expected: " << hex << setw(4) << setfill('0') << expected_uintmax
+        << " "
+        << "actual: " << hex << setw(4) << setfill('0') << actual_uintmax;
+  }
+}
+
+// this test shows that CRC16 works
+TEST(CRCx, Sunshine_CRC16_CCIT_ZERO) {
+  // http://www.sunshine2k.de/coding/javascript/crc/crc_js.html
+  // CRC16_CCIT_ZERO
+  // input not reflected
+  // result not reflected
+  // polynomial 0x1021
+  // initial value: 0
+  // final xor value: 0
+  // CRC Input Data: 0x31 0x32 0x33 0x34 0x35 0x36 0x37 0x38 0x39
+
+  const vector<uint8_t> data{0x31, 0x32, 0x33, 0x34, 0x35,
+                             0x36, 0x37, 0x38, 0x39};
+
+  ::crcx_ctx ctx = {};
+  ASSERT_TRUE(::crcx_init(&ctx, 16, 0, 0, 0x1021, false, false));
+
+  // clang-format off
+    auto expected_v = to_vector(
+        "0x0000 0x1021 0x2042 0x3063 0x4084 0x50A5 0x60C6 0x70E7 0x8108 0x9129 0xA14A 0xB16B 0xC18C 0xD1AD 0xE1CE 0xF1EF "
+        "0x1231 0x0210 0x3273 0x2252 0x52B5 0x4294 0x72F7 0x62D6 0x9339 0x8318 0xB37B 0xA35A 0xD3BD 0xC39C 0xF3FF 0xE3DE "
+        "0x2462 0x3443 0x0420 0x1401 0x64E6 0x74C7 0x44A4 0x5485 0xA56A 0xB54B 0x8528 0x9509 0xE5EE 0xF5CF 0xC5AC 0xD58D "
+        "0x3653 0x2672 0x1611 0x0630 0x76D7 0x66F6 0x5695 0x46B4 0xB75B 0xA77A 0x9719 0x8738 0xF7DF 0xE7FE 0xD79D 0xC7BC "
+        "0x48C4 0x58E5 0x6886 0x78A7 0x0840 0x1861 0x2802 0x3823 0xC9CC 0xD9ED 0xE98E 0xF9AF 0x8948 0x9969 0xA90A 0xB92B "
+        "0x5AF5 0x4AD4 0x7AB7 0x6A96 0x1A71 0x0A50 0x3A33 0x2A12 0xDBFD 0xCBDC 0xFBBF 0xEB9E 0x9B79 0x8B58 0xBB3B 0xAB1A "
+        "0x6CA6 0x7C87 0x4CE4 0x5CC5 0x2C22 0x3C03 0x0C60 0x1C41 0xEDAE 0xFD8F 0xCDEC 0xDDCD 0xAD2A 0xBD0B 0x8D68 0x9D49 "
+        "0x7E97 0x6EB6 0x5ED5 0x4EF4 0x3E13 0x2E32 0x1E51 0x0E70 0xFF9F 0xEFBE 0xDFDD 0xCFFC 0xBF1B 0xAF3A 0x9F59 0x8F78 "
+        "0x9188 0x81A9 0xB1CA 0xA1EB 0xD10C 0xC12D 0xF14E 0xE16F 0x1080 0x00A1 0x30C2 0x20E3 0x5004 0x4025 0x7046 0x6067 "
+        "0x83B9 0x9398 0xA3FB 0xB3DA 0xC33D 0xD31C 0xE37F 0xF35E 0x02B1 0x1290 0x22F3 0x32D2 0x4235 0x5214 0x6277 0x7256 "
+        "0xB5EA 0xA5CB 0x95A8 0x8589 0xF56E 0xE54F 0xD52C 0xC50D 0x34E2 0x24C3 0x14A0 0x0481 0x7466 0x6447 0x5424 0x4405 "
+        "0xA7DB 0xB7FA 0x8799 0x97B8 0xE75F 0xF77E 0xC71D 0xD73C 0x26D3 0x36F2 0x0691 0x16B0 0x6657 0x7676 0x4615 0x5634 "
+        "0xD94C 0xC96D 0xF90E 0xE92F 0x99C8 0x89E9 0xB98A 0xA9AB 0x5844 0x4865 0x7806 0x6827 0x18C0 0x08E1 0x3882 0x28A3 "
+        "0xCB7D 0xDB5C 0xEB3F 0xFB1E 0x8BF9 0x9BD8 0xABBB 0xBB9A 0x4A75 0x5A54 0x6A37 0x7A16 0x0AF1 0x1AD0 0x2AB3 0x3A92 "
+        "0xFD2E 0xED0F 0xDD6C 0xCD4D 0xBDAA 0xAD8B 0x9DE8 0x8DC9 0x7C26 0x6C07 0x5C64 0x4C45 0x3CA2 0x2C83 0x1CE0 0x0CC1 "
+        "0xEF1F 0xFF3E 0xCF5D 0xDF7C 0xAF9B 0xBFBA 0x8FD9 0x9FF8 0x6E17 0x7E36 0x4E55 0x5E74 0x2E93 0x3EB2 0x0ED1 0x1EF0 "
+    );
+  // clang-format on
+  auto actual_v = to_vector((uintmax_t *)ctx.table, ARRAY_SIZE(ctx.table));
+
+  ASSERT_EQ(actual_v, expected_v) << "The generated table is incorrect";
+
+  ASSERT_TRUE(::crcx(&ctx, &data.front(), data.size()));
+
+  uintmax_t expected_uintmax = 0x31c3;
+  uintmax_t actual_uintmax = ::crcx_fini(&ctx);
+
+  EXPECT_EQ(actual_uintmax, expected_uintmax)
+      << "The calculated CRC is incorrect";
 }
 
 // this test shows that CRC32 works
-TEST( CRCx, Sunshine_CRC32_POSIX ) {
-    // http://www.sunshine2k.de/coding/javascript/crc/crc_js.html
-    // CRC32_POSIX
-	// input not reflected
-	// result not reflected
-	// polynomial 0x4c11db7
-	// initial value: 0
-	// final xor value: -1
-	// CRC Input Data: 0x31 0x32 0x33 0x34 0x35 0x36 0x37 0x38 0x39
+TEST(CRCx, Sunshine_CRC32_POSIX) {
+  // http://www.sunshine2k.de/coding/javascript/crc/crc_js.html
+  // CRC32_POSIX
+  // input not reflected
+  // result not reflected
+  // polynomial 0x4c11db7
+  // initial value: 0
+  // final xor value: -1
+  // CRC Input Data: 0x31 0x32 0x33 0x34 0x35 0x36 0x37 0x38 0x39
 
-	const array<uint8_t, 9> data { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39 };
+  const vector<uint8_t> data{0x31, 0x32, 0x33, 0x34, 0x35,
+                             0x36, 0x37, 0x38, 0x39};
 
-    ::crcx_ctx ctx = {};
-    ::crcx_init_args( & ctx, 32, 0, -1, 0x4c11db7, false, false );
+  ::crcx_ctx ctx = {};
+  ASSERT_TRUE(::crcx_init(&ctx, 32, 0, -1, 0x4c11db7, false, false));
 
-    // clang-format off
-    auto expected_v = to_array(
+  // clang-format off
+    auto expected_v = to_vector(
         "0x00000000 0x04C11DB7 0x09823B6E 0x0D4326D9 0x130476DC 0x17C56B6B 0x1A864DB2 0x1E475005 "
         "0x2608EDB8 0x22C9F00F 0x2F8AD6D6 0x2B4BCB61 0x350C9B64 0x31CD86D3 0x3C8EA00A 0x384FBDBD "
         "0x4C11DB70 0x48D0C6C7 0x4593E01E 0x4152FDA9 0x5F15ADAC 0x5BD4B01B 0x569796C2 0x52568B75 "
@@ -289,35 +547,39 @@ TEST( CRCx, Sunshine_CRC32_POSIX ) {
         "0x89B8FD09 0x8D79E0BE 0x803AC667 0x84FBDBD0 0x9ABC8BD5 0x9E7D9662 0x933EB0BB 0x97FFAD0C "
         "0xAFB010B1 0xAB710D06 0xA6322BDF 0xA2F33668 0xBCB4666D 0xB8757BDA 0xB5365D03 0xB1F740B4 "
     );
-    // clang-format on
-    auto actual_v = to_array( (uintmax_t *)ctx.table, ARRAY_SIZE(ctx.table) );
+  // clang-format on
+  auto actual_v = to_vector((uintmax_t *)ctx.table, ARRAY_SIZE(ctx.table));
 
-    ASSERT_EQ( actual_v, expected_v ) << "The generated table is incorrect";
+  ASSERT_EQ(actual_v, expected_v) << "The generated table is incorrect";
 
-    uintmax_t expected_uintmax = 0x765e7680;
-    uintmax_t actual_uintmax = ::crcx( & ctx, & data.front(), data.size() );
+  ASSERT_TRUE(::crcx(&ctx, &data.front(), data.size()));
 
-    EXPECT_EQ( actual_uintmax, expected_uintmax ) << "The calculated CRC is incorrect";
+  uintmax_t expected_uintmax = 0x765e7680;
+  uintmax_t actual_uintmax = ::crcx_fini(&ctx);
+
+  EXPECT_EQ(actual_uintmax, expected_uintmax)
+      << "The calculated CRC is incorrect";
 }
 
 // this test shows that CRC64 works
-TEST( CRCx, Sunshine_CRC64_ECMA_182 ) {
-    // http://www.sunshine2k.de/coding/javascript/crc/crc_js.html
-    // CRC64_ECMA_182
-	// input not reflected
-	// result not reflected
-	// polynomial 0x4c11db7
-	// initial value: 0
-	// final xor value: 0
-	// CRC Input Data: 0x31 0x32 0x33 0x34 0x35 0x36 0x37 0x38 0x39
+TEST(CRCx, Sunshine_CRC64_ECMA_182) {
+  // http://www.sunshine2k.de/coding/javascript/crc/crc_js.html
+  // CRC64_ECMA_182
+  // input not reflected
+  // result not reflected
+  // polynomial 0x4c11db7
+  // initial value: 0
+  // final xor value: 0
+  // CRC Input Data: 0x31 0x32 0x33 0x34 0x35 0x36 0x37 0x38 0x39
 
-	const array<uint8_t, 9> data { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39 };
+  const vector<uint8_t> data{0x31, 0x32, 0x33, 0x34, 0x35,
+                             0x36, 0x37, 0x38, 0x39};
 
-    ::crcx_ctx ctx = {};
-    ::crcx_init_args( & ctx, 64, 0, 0, 0x42F0E1EBA9EA3693, false, false );
+  ::crcx_ctx ctx = {};
+  ASSERT_TRUE(::crcx_init(&ctx, 64, 0, 0, 0x42F0E1EBA9EA3693, false, false));
 
-    // clang-format off
-    auto expected_v = to_array(
+  // clang-format off
+    auto expected_v = to_vector(
         "0x0000000000000000 0x42F0E1EBA9EA3693 0x85E1C3D753D46D26 0xC711223CFA3E5BB5 0x493366450E42ECDF 0x0BC387AEA7A8DA4C 0xCCD2A5925D9681F9 0x8E224479F47CB76A "
         "0x9266CC8A1C85D9BE 0xD0962D61B56FEF2D 0x17870F5D4F51B498 0x5577EEB6E6BB820B 0xDB55AACF12C73561 0x99A54B24BB2D03F2 0x5EB4691841135847 0x1C4488F3E8F96ED4 "
         "0x663D78FF90E185EF 0x24CD9914390BB37C 0xE3DCBB28C335E8C9 0xA12C5AC36ADFDE5A 0x2F0E1EBA9EA36930 0x6DFEFF5137495FA3 0xAAEFDD6DCD770416 0xE81F3C86649D3285 "
@@ -351,15 +613,18 @@ TEST( CRCx, Sunshine_CRC64_ECMA_182 ) {
         "0x86B86ED5267CDBD3 0xC4488F3E8F96ED40 0x0359AD0275A8B6F5 0x41A94CE9DC428066 0xCF8B0890283E370C 0x8D7BE97B81D4019F 0x4A6ACB477BEA5A2A 0x089A2AACD2006CB9 "
         "0x14DEA25F3AF9026D 0x562E43B4931334FE 0x913F6188692D6F4B 0xD3CF8063C0C759D8 0x5DEDC41A34BBEEB2 0x1F1D25F19D51D821 0xD80C07CD676F8394 0x9AFCE626CE85B507 "
     );
-    // clang-format on
-    auto actual_v = to_array( (uintmax_t *)ctx.table, ARRAY_SIZE(ctx.table) );
+  // clang-format on
+  auto actual_v = to_vector((uintmax_t *)ctx.table, ARRAY_SIZE(ctx.table));
 
-    ASSERT_EQ( actual_v, expected_v ) << "The generated table is incorrect";
+  ASSERT_EQ(actual_v, expected_v) << "The generated table is incorrect";
 
-    uintmax_t expected_uintmax = 0x6c40df5f0b497347;
-    uintmax_t actual_uintmax = ::crcx( & ctx, & data.front(), data.size() );
+  ASSERT_TRUE(::crcx(&ctx, &data.front(), data.size()));
 
-    EXPECT_EQ( actual_uintmax, expected_uintmax ) << "The calculated CRC is incorrect";
+  uintmax_t expected_uintmax = 0x6c40df5f0b497347;
+  uintmax_t actual_uintmax = ::crcx_fini(&ctx);
+
+  EXPECT_EQ(actual_uintmax, expected_uintmax)
+      << "The calculated CRC is incorrect";
 }
 
 #if 0

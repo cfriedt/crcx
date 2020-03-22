@@ -26,6 +26,25 @@
  * @file
  *
  * CRCx - yet another CRC Library
+ *
+ * Typical use cases of CRCx would do something like the following:
+ *
+ * @code{.c}
+ * #include <crcx.h>
+ * int main() {
+ *   const char data[] = { 'W' };
+ *   struct crcx_ctx ctx = {};
+ *   // Initialize an n-bit CRC. Here n=8.
+ *   // Note, polynomial (here, 0x107) can be (at most) n+1 bits. Different
+ *   // CRC algorithms may have non-zero init, fini, and reflection parameters.
+ *   crcx_init(&ctx, 8, 0, 0, 0x107, false, false);
+ *   crcx(&ctx, data, sizeof(data));
+ *   uintmax_t crc = crcx_fini(&ctx);
+ *   // The value of crc should be 0xa2.
+ *   return 0;
+ * }
+ * @endcode
+ *
  */
 
 #ifndef CRCX_H_
@@ -68,32 +87,46 @@ struct crcx_ctx {
 };
 
 /**
+ * Reflect the least-significant @p n bits of @p x
+ *
+ * This function truncates @p n to the number of bits contained in a uintmax_t.
+ *
+ * It does not fail.
+ *
+ * @param x  the variable containing the bits to reflect
+ * @param n  the number of bits to reflect
+ * @return   x with the least-significant @p n bits of @p x reflected
+ */
+uintmax_t crcx_reflect(const uintmax_t x, const uint8_t n);
+
+/**
+ * Check a CRC context for validity
+ *
+ * @param ctx the CRC context to check
+ *
+ * @return true if @p ctx is valid, otherwise false
+ */
+bool crcx_valid(const struct crcx_ctx *ctx);
+
+/**
  * Generate the CRC Lookup Table (LUT)
  *
  * @param ctx the CRC context
+ *
+ * @return true if the table is generated, otherwise false
  *
  * @see <a
  * href="https://en.wikipedia.org/wiki/Computation_of_cyclic_redundancy_checks#Generating_the_tables">Computation
  * of cyclic redundancy checks: Generating the tables</a>
  */
-void crcx_generate_table(struct crcx_ctx *ctx);
-
-/**
- * Initialize a CRC context where most of the parameters have already been set.
- *
- * This function initializes the @ref crcx_ctx.lfsr with the contents of @ref
- * crcx_ctx.init and also generates the CRC lookup table.
- *
- * @param ctx the CRC context to initialize
- *
- * @return true on success, otherwise false
- */
-bool crcx_init(struct crcx_ctx *ctx);
+bool crcx_generate_table(struct crcx_ctx *ctx);
 
 /**
  * Initialize a CRC context with the given parameters.
  *
- * @param ctx             ctx the CRC context to initialize
+ * Warning: @p init and @p fini will be truncated to @p n bits
+ *
+ * @param ctx             the CRC context to initialize
  * @param n               number of bits in CRC. For E.g. CRC-8 use 8.
  * @param init            initial value stored in the @ref crcx_ctx.lfsr
  * @param fini            final value xor'ed with the @ref crcx_ctx.lfsr
@@ -104,9 +137,8 @@ bool crcx_init(struct crcx_ctx *ctx);
  *
  * @return true on success, otherwise false
  */
-bool crcx_init_args(struct crcx_ctx *ctx, uint8_t n, uintmax_t init,
-                    uintmax_t fini, uintmax_t poly, bool reflect_input,
-                    bool reflect_output);
+bool crcx_init(struct crcx_ctx *ctx, uint8_t n, uintmax_t init, uintmax_t fini,
+               uintmax_t poly, bool reflect_input, bool reflect_output);
 
 /**
  * Finalize a CRC context
@@ -117,34 +149,48 @@ bool crcx_init_args(struct crcx_ctx *ctx, uint8_t n, uintmax_t init,
  * set.
  *
  * @param ctx  ctx the CRC context to initialize
+ *
+ * @return the result of the CRC calculation or -1 on error
  */
-void crcx_fini(struct crcx_ctx *ctx);
+uintmax_t crcx_fini(struct crcx_ctx *ctx);
 
 /**
- * Update a CRC context
+ * Update the CRC calculation with new @p data
  *
- * This function iterates the CRC computation once, overwriting the @ref
- * crcx_ctx.lfsr.
+ * Warning: This function does not do any input validation.
  *
- * @param ctx   ctx the CRC context to update
- * @param data  a single byte of new data
+ * Typical use cases should use @ref crcx.
+ *
+ * @param ctx   the CRC context to update
+ * @param data  the data for which the CRC should be updated
  */
 void crcx_update(struct crcx_ctx *ctx, const uint8_t data);
 
 /**
  * Compute the CRC
  *
- * @param ctx   ctx the CRC context to use
+ * This function should be called after @ref crcx_init and before @ref
+ * crcx_fini.
+ *
+ * It validates input with @ref crcx_valid and then calls @ref crcx_update
+ * @p len times, once for each item in @p data.
+ *
+ * Typical uses cases of CRCx will use this function along with @ref crcx_init
+ * and
+ * @ref crcx_fini. However, doing so is simply a shorthand. It is entirely
+ * possible
+ * to call @ref crcx_update directly without the use of this function.
+ *
+ * @param ctx   the CRC context to use
  * @param data  the data for which the CRC should be calculated
  * @param len   the length of @p data
  *
- * @return      the CRC for the provided @p data
- * @return      -1 in case a parameter is invalid
+ * @return      true on success, otherwise false
  *
  * @see <a href="https://en.wikipedia.org/wiki/Cyclic_redundancy_check">Cyclic
  * Redundancy Check</a>
  */
-uintmax_t crcx(struct crcx_ctx *ctx, const void *data, const size_t len);
+bool crcx(struct crcx_ctx *ctx, const void *data, const size_t len);
 
 __END_DECLS
 

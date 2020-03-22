@@ -29,6 +29,18 @@
 
 #include "crcx.h"
 
+#ifndef ARRAY_SIZE
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
+#endif
+
+#ifndef MAX
+#define MAX(a, b) ((a) >= (b) ? (a) : (b))
+#endif
+
+#ifndef MIN
+#define MIN(a, b) ((a) <= (b) ? (a) : (b))
+#endif
+
 #undef DEBUG
 #if defined(DEBUG)
 #include <stdio.h>
@@ -40,10 +52,6 @@
 
 #if defined(DEBUG)
 
-#ifndef ARRAY_SIZE
-#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
-#endif
-
 static void crc_print_table(const struct crcx_ctx *ctx) {
   const size_t nibbles_per_entry = ctx->n / 4;
   const size_t cols_per_row = 8;
@@ -51,7 +59,7 @@ static void crc_print_table(const struct crcx_ctx *ctx) {
   const size_t rows = ARRAY_SIZE(ctx->table) / cols_per_row;
 
   char fmt[16];
-  snprintf(fmt, sizeof(fmt), "%%0%" PRIx64 "x ", nibbles_per_entry);
+  snprintf(fmt, sizeof(fmt), "%%0%" PRIxMAX "x ", nibbles_per_entry);
 
   for (size_t row = 0; row < rows; ++row) {
     for (size_t col = 0; col < cols; ++col) {
@@ -65,21 +73,73 @@ static inline void crc_print_table(const struct crcx_ctx *ctx) { (void)ctx; }
 #endif
 
 uintmax_t crcx_reflect(const uintmax_t x, const uint8_t n) {
-  D("x: %" PRIx64 " n: %u", x, n);
+
+  const uint8_t _n = MIN(n, 8 * sizeof(uintmax_t));
 
   uintmax_t y = 0;
-  for (size_t i = 0; i < n; ++i) {
-    bool bit = (x >> i) & 1;
-    y |= bit << ((n - 1) - i);
-  }
 
-  D("y: %" PRIx64, y);
+  for (size_t i = 0; i < _n; ++i) {
+    bool bit = (x >> i) & 1;
+    y |= bit << ((_n - 1) - i);
+  }
 
   return y;
 }
 
-void crcx_generate_table(struct crcx_ctx *ctx) {
+bool crcx_valid(const struct crcx_ctx *ctx) {
+
+  if (NULL == ctx) {
+    D("ctx is NULL");
+    return false;
+  }
+
+  if (0 == ctx->poly) {
+    D("0 is not a valid polynomial");
+    return false;
+  }
+
+  if (0 == ctx->n || ctx->n > 8 * sizeof(uintmax_t) || 0 != ctx->n % 8) {
+    D("invalid value for ctx->n: %u", ctx->n);
+    return false;
+  }
+
+  if (ctx->msb != ((uintmax_t)1 << (ctx->n - 1))) {
+    D("invalid value for ctx->msb: expected: %" PRIxMAX " actual: %" PRIxMAX,
+      (uintmax_t)1 << (ctx->n - 1), ctx->msb);
+    return false;
+  }
+
+  if (ctx->n == 8 * sizeof(uintmax_t)) {
+    if (ctx->mask != (uintmax_t)-1) {
+      D("invalid value for ctx->msb: expected: %" PRIxMAX " actual: %" PRIxMAX,
+        (uintmax_t)-1, ctx->mask);
+      return false;
+    }
+  } else {
+    if (ctx->mask != (1ULL << ctx->n) - 1) {
+      D("invalid value for ctx->msb: expected: %" PRIxMAX " actual: %" PRIxMAX,
+        ((uintmax_t)1 << ctx->n) - 1, ctx->mask);
+      return false;
+    }
+  }
+
+  // highest bit pos (0-indexed). depends on poly not being zero
+  const uint8_t highest_bit_pos =
+      8 * sizeof(uintmax_t) - __builtin_clzll(ctx->poly) - 1;
+  if (ctx->n < highest_bit_pos) {
+    D("invalid polynomial %" PRIxMAX " for an %u-bit CRC", ctx->poly, ctx->n);
+    return false;
+  }
+
+  return true;
+}
+
+bool crcx_generate_table(struct crcx_ctx *ctx) {
   uintmax_t *table = (uintmax_t *)ctx->table;
+
+  if (!crcx_valid(ctx)) {
+    return false;
+  }
 
   table[0] = 0;
   uintmax_t crc = ctx->msb;
@@ -99,89 +159,91 @@ void crcx_generate_table(struct crcx_ctx *ctx) {
   crc_print_table(ctx);
 }
 
-#define SET(t, k, v) *((t *)(&(k))) = v
+#define SET(t, k, v) *((t *)(&(k))) = (v)
 
-bool crcx_init(struct crcx_ctx *ctx) {
+bool crcx_init(struct crcx_ctx *ctx, uint8_t n, uintmax_t init, uintmax_t fini,
+               uintmax_t poly, bool reflect_input, bool reflect_output) {
   D("");
 
-  if (0 == ctx->n || ctx->n > 8 * sizeof(uintmax_t) || 0 != ctx->n % 8) {
-    D("invlalid value for ctx->n: %u", ctx->n);
+  SET(uintmax_t, ctx->n, n);
+  SET(uintmax_t, ctx->poly, poly);
+  SET(bool, ctx->reflect_input, reflect_input);
+  SET(bool, ctx->reflect_output, reflect_output);
+
+  SET(uintmax_t, ctx->msb, (uintmax_t)1 << (ctx->n - 1));
+  if (ctx->n == 8 * sizeof(uintmax_t)) {
+    SET(uintmax_t, ctx->mask, (uintmax_t)(-1));
+  } else {
+    SET(uintmax_t, ctx->mask, ((uintmax_t)1 << ctx->n) - 1);
+  }
+
+  SET(uintmax_t, ctx->init, init & ctx->mask);
+  SET(uintmax_t, ctx->fini, fini & ctx->mask);
+
+  if (!crcx_valid(ctx)) {
     return false;
   }
 
-  memset((uintmax_t *)ctx->table, 0, sizeof(ctx->table));
-
-  SET(uintmax_t, ctx->msb, 1 << (ctx->n - 1));
-  if (ctx->n == 8 * sizeof(uintmax_t)) {
-    SET(uintmax_t, ctx->mask, -1);
-  } else {
-    SET(uintmax_t, ctx->mask, (1 << ctx->n) - 1);
-  }
-
-  SET(uintmax_t, ctx->init, ctx->init & ctx->mask);
-  SET(uintmax_t, ctx->fini, ctx->fini & ctx->mask);
-
   ctx->lfsr = ctx->init;
-
+  memset((uintmax_t *)ctx->table, 0, sizeof(ctx->table));
   crcx_generate_table(ctx);
 
   return true;
 }
 
-bool crcx_init_args(struct crcx_ctx *ctx, uint8_t n, uintmax_t init,
-                    uintmax_t fini, uintmax_t poly, bool reflect_input,
-                    bool reflect_output) {
-  D("");
+uintmax_t crcx_fini(struct crcx_ctx *ctx) {
 
-  SET(uintmax_t, ctx->n, n);
-  SET(uintmax_t, ctx->init, init);
-  SET(uintmax_t, ctx->fini, fini);
-  SET(uintmax_t, ctx->poly, poly);
-  SET(bool, ctx->reflect_input, reflect_input);
-  SET(bool, ctx->reflect_output, reflect_output);
-
-  return crcx_init(ctx);
-}
-
-void crcx_fini(struct crcx_ctx *ctx) {
-  D("");
+  if (!crcx_valid(ctx)) {
+    return -1;
+  }
 
   ctx->lfsr ^= ctx->fini;
   ctx->lfsr &= ctx->mask;
+  D("lfsr: %" PRIxMAX, ctx->lfsr);
 
   if (ctx->reflect_output) {
     ctx->lfsr = crcx_reflect(ctx->lfsr, ctx->n);
+    D("lfsr: %" PRIxMAX, ctx->lfsr);
   }
+
+  return ctx->lfsr;
 }
 
-void crcx_update(struct crcx_ctx *ctx, const uint8_t data) {
-  D("");
-
-  uint8_t d;
+void crcx_update(struct crcx_ctx *ctx, uint8_t data) {
 
   if (ctx->reflect_input) {
-    d = crcx_reflect(data, 8);
-  } else {
-    d = data;
+    D("reflecting: %02x => %02x", data, (uint8_t)crcx_reflect(data, 8));
+    data = crcx_reflect(data, 8);
   }
 
-  uint8_t idx = ctx->lfsr ^ d;
-  ctx->lfsr = (ctx->lfsr << 8) ^ ctx->table[idx];
+  D("data: %u lfsr: %" PRIxMAX, data, ctx->lfsr);
+
+  // From
+  // https://en.wikipedia.org/wiki/Computation_of_cyclic_redundancy_checks#Multi-bit_computation
+  uint8_t upper_byte = (ctx->lfsr >> (ctx->n - 8));
+  D("upper byte of lfsr: %02x", upper_byte);
+  uint8_t idx = data ^ upper_byte;
+  D("idx: %u", idx);
+
+  D("lfsr  (pre-shift): %" PRIxMAX, ctx->lfsr);
+  ctx->lfsr <<= 8;
   ctx->lfsr &= ctx->mask;
+  D("lfsr (post-shift): %" PRIxMAX, ctx->lfsr);
+  D("table[%u]: %" PRIxMAX, idx, ctx->table[idx]);
+  ctx->lfsr ^= ctx->table[idx];
+  D("lfsr   (post-xor): %" PRIxMAX, ctx->lfsr);
 }
 
-uintmax_t crcx(struct crcx_ctx *ctx, const void *data, const size_t len) {
+bool crcx(struct crcx_ctx *ctx, const void *data, const size_t len) {
   D("");
 
-  if (!crcx_init(ctx)) {
-    return -1;
+  if (!crcx_valid(ctx)) {
+    return false;
   }
 
   for (size_t i = 0; i < len; ++i) {
     crcx_update(ctx, ((const uint8_t *)data)[i]);
   }
 
-  crcx_fini(ctx);
-
-  return ctx->lfsr;
+  return true;
 }
