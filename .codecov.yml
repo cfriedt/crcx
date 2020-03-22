@@ -1,2 +1,2 @@
 ignore:
-  - "*-test.cpp"
+  - "**/*-test.cpp"
