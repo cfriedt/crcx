@@ -157,6 +157,8 @@ bool crcx_generate_table(struct crcx_ctx *ctx) {
   }
 
   crc_print_table(ctx);
+
+  return true;
 }
 
 #define SET(t, k, v) *((t *)(&(k))) = (v)
@@ -186,9 +188,8 @@ bool crcx_init(struct crcx_ctx *ctx, uint8_t n, uintmax_t init, uintmax_t fini,
 
   ctx->lfsr = ctx->init;
   memset((uintmax_t *)ctx->table, 0, sizeof(ctx->table));
-  crcx_generate_table(ctx);
 
-  return true;
+  return crcx_generate_table(ctx);
 }
 
 uintmax_t crcx_fini(struct crcx_ctx *ctx) {

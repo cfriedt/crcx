@@ -11,3 +11,5 @@ A simple, straightforward [CRC](https://en.wikipedia.org/wiki/Cyclic_redundancy_
 If you're looking for something fast, check out [crcutil](https://github.com/rurban/crcutil).
 
 See the file [LICENSE](https://github.com/cfriedt/crcx/blob/master/LICENSE) for licensing terms and copyright.
+
+The Doxygen API docs are availble [here](https://cfriedt.github.io/crcx/).
