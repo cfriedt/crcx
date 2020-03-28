@@ -18,6 +18,7 @@ aclocal.m4
 m4/lt*.m4
 m4/libtool*.m4
 autom4te.cache/
+Doxyfile
 Makefile
 Makefile.in
 compile
