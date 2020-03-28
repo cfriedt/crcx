@@ -4,8 +4,13 @@ doxyfile.stamp:
 	$(DOXYGEN)
 	touch $@
 
-CLEANFILES = \
-	doxyfile.stamp
+html: doxyfile.stamp
+
+CLEANFILES =           \
+	doxyfile.stamp \
+	html           \
+	latex          \
+	Doxyfile
 
 all-local: doxyfile.stamp
 
