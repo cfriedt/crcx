@@ -21,9 +21,10 @@ before_script:
   - sudo sh .scripts/build-and-install-libgtest-libraries.sh
 
 script:
+  - autoreconf -vfi
+  - ./configure
   - make -j`nproc --all`
   - make check
-  - make doc
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
@@ -35,7 +36,7 @@ deploy:
   keep_history: true
   on:
     tags: true
-  local_dir: html
+  local_dir: docs/html
 
 notifications:
   email: false
