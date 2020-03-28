@@ -176,8 +176,7 @@ void crcx_update(struct crcx_ctx *ctx, const uint8_t data);
  * @p len times, once for each item in @p data.
  *
  * Typical uses cases of CRCx will use this function along with @ref crcx_init
- * and
- * @ref crcx_fini. However, doing so is simply a shorthand. It is entirely
+ * and @ref crcx_fini. However, doing so is simply a shorthand. It is entirely
  * possible
  * to call @ref crcx_update directly without the use of this function.
  *

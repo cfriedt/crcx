@@ -72,6 +72,9 @@ static void crc_print_table(const struct crcx_ctx *ctx) {
 static inline void crc_print_table(const struct crcx_ctx *ctx) { (void)ctx; }
 #endif
 
+// This can probably be done nibble-wise with a LUT and a bunch of shift in
+// constant time followed by a shift corresponding to the leading number of
+// zeros
 uintmax_t crcx_reflect(const uintmax_t x, const uint8_t n) {
 
   const uint8_t _n = MIN(n, 8 * sizeof(uintmax_t));
@@ -188,7 +191,6 @@ bool crcx_init(struct crcx_ctx *ctx, uint8_t n, uintmax_t init, uintmax_t fini,
 
   ctx->lfsr = ctx->init;
   memset((uintmax_t *)ctx->table, 0, sizeof(ctx->table));
-
   return crcx_generate_table(ctx);
 }
 
@@ -217,22 +219,15 @@ void crcx_update(struct crcx_ctx *ctx, uint8_t data) {
     data = crcx_reflect(data, 8);
   }
 
-  D("data: %u lfsr: %" PRIxMAX, data, ctx->lfsr);
-
-  // From
   // https://en.wikipedia.org/wiki/Computation_of_cyclic_redundancy_checks#Multi-bit_computation
   uint8_t upper_byte = (ctx->lfsr >> (ctx->n - 8));
-  D("upper byte of lfsr: %02x", upper_byte);
   uint8_t idx = data ^ upper_byte;
-  D("idx: %u", idx);
 
-  D("lfsr  (pre-shift): %" PRIxMAX, ctx->lfsr);
   ctx->lfsr <<= 8;
   ctx->lfsr &= ctx->mask;
-  D("lfsr (post-shift): %" PRIxMAX, ctx->lfsr);
-  D("table[%u]: %" PRIxMAX, idx, ctx->table[idx]);
   ctx->lfsr ^= ctx->table[idx];
-  D("lfsr   (post-xor): %" PRIxMAX, ctx->lfsr);
+
+  D("data: %u lfsr: %" PRIxMAX, data, ctx->lfsr);
 }
 
 bool crcx(struct crcx_ctx *ctx, const void *data, const size_t len) {
