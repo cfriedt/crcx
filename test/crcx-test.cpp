@@ -627,59 +627,193 @@ TEST(CRCx, Sunshine_CRC64_ECMA_182) {
       << "The calculated CRC is incorrect";
 }
 
-#if 0
+TEST(CRCx, reflect24) {
+  uintmax_t expected_uintmax = 0xabcdef;
+  uintmax_t actual_uintmax = ::crcx_reflect(0xf7b3d5, 24);
+
+  EXPECT_EQ(actual_uintmax, expected_uintmax)
+      << "expected: " << hex << setw(6) << setfill('0') << expected_uintmax
+      << "actual:   " << hex << setw(6) << setfill('0') << actual_uintmax;
+}
+
 // BLE CRC polynomial is  x^24 + x^10 + x^9 + x^6 + x^4 + x^3 + x + 1
-// This corresponds to 0x00065b
+// This corresponds to 0x[1]00065b
 // In the advertising channel, the BLE CRC initializer is 0x555555
 
-TEST( CRCx, cc1352r_example1 ) {
+const size_t ble_crc_n = 24;
+const uintmax_t ble_poly(0x100065b);
+const uintmax_t ble_init(0x555555);
+const uintmax_t ble_fini(0);
+const bool ble_reflect_input = true;
+const bool ble_reflect_output = false;
 
-    const uint32_t wireshark_crc( 0x0801bd );
-    const uintmax_t sw_crc_init( 0x00065b );
-    const uintmax_t sw_crc_poly( 0x555555 );
+enum {
+  ADV_IND = 0x0,
+  ADV_NONCONN_IND = 0x2,
+  BDADDR_SIZE = 6,
+  PDU_AC_LL_HEADER_SIZE = 2,
+  ADV_DATA_LEN = 31,
+};
 
-    vector<uint8_t> rxbuf {{
-        0x2c, 0xc5, 0x22, 0x44, 0x05, 0x6b, 0x8e, 0x55,
-        0x6b, 0xcd, 0xde, 0x1e, 0xb0, 0x6f, 0xc0, 0x4a,
-        0x85, 0x7b, 0x29, 0x32, 0x18, 0x8d, 0x02, 0x0a,
-        0x00, 0x24, 0x00, 0x00, 0x00, 0xf4, 0x01, 0x00,
-        0xfe, 0xff, 0xff, 0x1f, 0x08, 0x10, 0x80, 0xbd,
-        0xcb, 0x1d, 0x98, 0x94, 0x06
-    }};
-
-    size_t offs = rxbuf[0];
-    uint8_t *data = & rxbuf[1];
-
-    uint32_t timestamp = 0;
-
-    timestamp |= data[--offs] << 24;
-    timestamp |= data[--offs] << 16;
-    timestamp |= data[--offs] << 8;
-    timestamp |= data[--offs] << 0;
-
-    ASSERT_EQ(110401565, timestamp);
-
-    int8_t rssi = int8_t( data[--offs] );
-    ASSERT_EQ(rssi, -53);
-
-    uint32_t hw_crc = 0;
-
-    hw_crc |= data[--offs] << 16;
-    hw_crc|= data[--offs] << 8;
-    hw_crc|= data[--offs] << 0;
-
-    size_t len = offs + 1;
-
-    crcx_ctx ctx;
-    uintmax_t sw_crc = crc_args( & ctx, 24, sw_crc_init, sw_crc_poly, data, len );
-
-    EXPECT_EQ(hw_crc, wireshark_crc) << "HW CRC (" << hex << setw(6) << setfill('0') << hw_crc << ") does not match Wireshark CRC (" << hex << setw(6) << setfill('0') << wireshark_crc << ")";
-    EXPECT_EQ(sw_crc, wireshark_crc) << "SW CRC (" << hex << setw(6) << setfill('0') << sw_crc << ") does not match Wireshark CRC (" << hex << setw(6) << setfill('0') << wireshark_crc << ")";
-    EXPECT_EQ(sw_crc, hw_crc) << "SW CRC (" << hex << setw(6) << setfill('0') << sw_crc << ") does not match HW CRC (" << hex << setw(6) << setfill('0') << hw_crc << ")";
-}
-
-TEST( BleCrc, e2e_example1 ) {
-    // https://devzone.nordicsemi.com/f/nordic-q-a/679/ble-crc-calculation
-    //
-}
+// adapted from Zephyr
+struct pdu_adv {
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+  uint8_t type : 4;
+  uint8_t rfu : 1;
+  uint8_t chan_sel : 1;
+  uint8_t tx_addr : 1;
+  uint8_t rx_addr : 1;
+#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+  uint8_t rx_addr : 1;
+  uint8_t tx_addr : 1;
+  uint8_t chan_sel : 1;
+  uint8_t rfu : 1;
+  uint8_t type : 4;
+#else
+#error "Unsupported endianness"
 #endif
+
+  uint8_t len;
+
+  // for adv_ind
+  uint8_t addr[BDADDR_SIZE];
+  uint8_t data[ADV_DATA_LEN];
+} __attribute__((packed));
+
+TEST(CRCx, board_example1) {
+
+  vector<uint8_t> rxbuf {{
+    0x2c, 0xc5, 0x22, 0x44, 0x05, 0x6b, 0x8e, 0x55,
+    0x6b, 0xcd, 0xde, 0x1e, 0xb0, 0x6f, 0xc0, 0x4a,
+    0x85, 0x7b, 0x29, 0x32, 0x18, 0x8d, 0x02, 0x0a,
+    0x00, 0x24, 0x00, 0x00, 0x00, 0xf4, 0x01, 0x00,
+    0xfe, 0xff, 0xff, 0x1f, 0x08, 0x10, 0x80, 0xbd,
+    0xcb, 0x1d, 0x98, 0x94, 0x06
+  }};
+
+  size_t offs = rxbuf[0];
+  uint8_t *data = &rxbuf[1];
+
+  uint32_t timestamp = 0;
+
+  timestamp |= data[--offs] << 24;
+  timestamp |= data[--offs] << 16;
+  timestamp |= data[--offs] << 8;
+  timestamp |= data[--offs] << 0;
+
+  ASSERT_EQ(110401565, timestamp);
+
+  int8_t rssi = int8_t(data[--offs]);
+  ASSERT_EQ(rssi, -53);
+
+  uint32_t hw_crc = 0;
+
+  hw_crc |= data[--offs] << 16;
+  hw_crc |= data[--offs] << 8;
+  hw_crc |= data[--offs] << 0;
+
+  size_t len = offs;
+
+  const size_t pdu_len = PDU_AC_LL_HEADER_SIZE + len;
+
+  const uint32_t wireshark_crc(0x0801bd);
+
+  ::crcx_ctx ctx = {};
+  ASSERT_TRUE(::crcx_init(&ctx, ble_crc_n, ble_init, ble_fini, ble_poly,
+                          ble_reflect_input, ble_reflect_output));
+  ASSERT_TRUE(::crcx(&ctx, data, len));
+  uintmax_t sw_crc = ::crcx_fini(&ctx);
+
+  // When hardware CRC checking (filtering) is enabled on this radio,
+  // no packets are received. When hardware CRC filtering is disabled on this
+  // radio packets are received. It would seem that the radio hardware is
+  // not properly calculating the CRC.
+
+  // When comparing for EQ, fails with message HW CRC (bd8010) does not match Wireshark CRC (0801bd)
+  EXPECT_NE(hw_crc, wireshark_crc) << "HW CRC (" << hex << setw(6) <<
+    setfill('0') << hw_crc << ") does not match Wireshark CRC (" << hex <<
+    setw(6) << setfill('0') << wireshark_crc << ")";
+
+  // Succeeds
+  EXPECT_EQ(sw_crc, wireshark_crc)
+      << "SW CRC (" << hex << setw(6) << setfill('0') << sw_crc
+      << ") does not match Wireshark CRC (" << hex << setw(6) << setfill('0')
+      << wireshark_crc << ")";
+
+  // When comparing for EQ, fails with message SW CRC (0801bd) does not match HW CRC (bd8010)
+  EXPECT_NE(sw_crc, hw_crc) << "SW CRC (" << hex << setw(6) << setfill('0')
+    << sw_crc << ") does not match HW CRC (" << hex << setw(6) << setfill('0')
+    << hw_crc << ")";
+}
+
+TEST(CRCx, nrf_support1) {
+  // https://devzone.nordicsemi.com/f/nordic-q-a/679/ble-crc-calculation
+
+  const struct pdu_adv pdu = {
+      .type = ADV_IND,
+      .rfu = 0,
+      .chan_sel = 0,
+      .tx_addr = 0,
+      .rx_addr = 0,
+      .len = 9,
+      .addr =
+          {
+              // note, this is least-significant byte first
+              0x0d, 0xef, 0x84, 0xb7, 0x2d, 0x3c,
+          },
+      .data =
+          {
+              0x02, 0x01, 0x05, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+              0,    0,    0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+          },
+  };
+  const size_t pdu_len = PDU_AC_LL_HEADER_SIZE + pdu.len;
+
+  ::crcx_ctx ctx = {};
+  ASSERT_TRUE(::crcx_init(&ctx, ble_crc_n, ble_init, ble_fini, ble_poly,
+                          ble_reflect_input, ble_reflect_output));
+  ASSERT_TRUE(::crcx(&ctx, &pdu, pdu_len));
+  uintmax_t expected_uintmax = ::crcx_reflect(0xa4e2c2, ctx.n);
+  uintmax_t actual_uintmax = ::crcx_fini(&ctx);
+
+  EXPECT_EQ(actual_uintmax, expected_uintmax)
+      << "expected: " << hex << setw(6) << setfill('0') << expected_uintmax
+      << " "
+      << "actual: " << hex << setw(6) << setfill('0') << actual_uintmax << " ";
+}
+
+TEST(CRCx, ble_core_52_4_2_1_Legacy_Advertising_PDUs) {
+  // https://www.bluetooth.com/specifications/bluetooth-core-specification/
+
+  const struct pdu_adv pdu = {
+      .type = ADV_NONCONN_IND,
+      .rfu = 0,
+      .chan_sel = 0,
+      .tx_addr = 1,
+      .rx_addr = 0,
+      .len = 9,
+      .addr =
+          {
+              // note, this is least-significant byte first
+              0xa6, 0xa5, 0xa4, 0xa3, 0xa2, 0xc1,
+          },
+      .data =
+          {
+              0x01, 0x02, 0x03, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+              0,    0,    0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+          },
+  };
+  const size_t pdu_len = PDU_AC_LL_HEADER_SIZE + pdu.len;
+
+  ::crcx_ctx ctx = {};
+  ASSERT_TRUE(::crcx_init(&ctx, ble_crc_n, ble_init, ble_fini, ble_poly,
+                          ble_reflect_input, ble_reflect_output));
+  ASSERT_TRUE(::crcx(&ctx, &pdu, pdu_len));
+  uintmax_t expected_uintmax = 0xb52dd7;
+  uintmax_t actual_uintmax = ::crcx_fini(&ctx);
+
+  EXPECT_EQ(actual_uintmax, expected_uintmax)
+      << "expected: " << hex << setw(6) << setfill('0') << expected_uintmax
+      << " "
+      << "actual: " << hex << setw(6) << setfill('0') << actual_uintmax << " ";
+}
