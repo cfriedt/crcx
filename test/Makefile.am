@@ -14,7 +14,7 @@ if HAVE_GTEST
 
 noinst_PROGRAMS += crcx-test
 crcx_test_SOURCES = crcx-test.cpp
-crcx_test_LDLIBS = -lgtest -lgtest_main
+crcx_test_LDLIBS = @GTEST_LIBS@
 
 check-local:
 	$(MAKE) gtest
