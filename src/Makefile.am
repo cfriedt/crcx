@@ -7,5 +7,5 @@ libcrcx_la_SOURCES = \
 crcx_c_CFLAGS = \
 	-Wall -Wextra -Werror
 
-include_HEADERS = \
-	crcx.h
+nobase_include_HEADERS = \
+	crcx/crcx.h
