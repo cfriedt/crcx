@@ -21,6 +21,8 @@ AC_PROG_MAKE_SET
 AC_PROG_CC_C11
 #AX_CXX_COMPILE_STDCXX_11
 
+PKG_INSTALLDIR
+
 # Checks for libraries.
 
 # gtest_main is required for unit and integration tests
@@ -89,6 +91,7 @@ AM_COND_IF([HAVE_DOXYGEN], [AC_CONFIG_FILES([docs/Doxyfile])])
 AC_CONFIG_FILES([
 	Makefile
 	src/Makefile
+	src/crcx.pc
 	test/Makefile
 	docs/Makefile
 ])

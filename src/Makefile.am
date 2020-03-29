@@ -9,3 +9,6 @@ crcx_c_CFLAGS = \
 
 nobase_include_HEADERS = \
 	crcx/crcx.h
+
+pkgconfig_DATA = \
+	crcx.pc

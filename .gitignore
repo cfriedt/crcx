@@ -2,6 +2,7 @@
 /latex/
 *-test
 *.gcno
+*.pc
 *.o
 *.a
 *.la
