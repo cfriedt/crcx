@@ -27,7 +27,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "crcx.h"
+#include "crcx/crcx.h"
 
 #ifndef ARRAY_SIZE
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
