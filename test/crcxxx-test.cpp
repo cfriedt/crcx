@@ -237,7 +237,7 @@ TEST(CRCx, Sunshine_CRC64_ECMA_182) {
 
 TEST(CRCx, reflect24) {
   uintmax_t expected_uintmax = 0xabcdef;
-  uintmax_t actual_uintmax = reflect(0xf7b3d5,24);
+  uintmax_t actual_uintmax = reflect(0xf7b3d5, 24);
 
   EXPECT_EQ(actual_uintmax, expected_uintmax)
       << "expected: " << hex << setw(6) << setfill('0') << expected_uintmax
@@ -324,7 +324,8 @@ TEST(CRCx, board_example1) {
   const uint32_t wireshark_crc(0x0801bd);
 
   using Crcx = Crc<ble_crc_n, uint32_t, uint32_t(ble_poly)>;
-  Crcx crc(uint32_t(ble_init), uint32_t(ble_fini), ble_reflect_input, ble_reflect_output);
+  Crcx crc(uint32_t(ble_init), uint32_t(ble_fini), ble_reflect_input,
+           ble_reflect_output);
   crc.update(data, data + len);
   uintmax_t sw_crc = crc.fini();
 
@@ -385,7 +386,8 @@ TEST(CRCx, nrf_support1) {
   const size_t pdu_len = PDU_AC_LL_HEADER_SIZE + pdu.len;
 
   using Crcx = Crc<ble_crc_n, uint32_t, uint32_t(ble_poly)>;
-  Crcx crc(uint32_t(ble_init), uint32_t(ble_fini), ble_reflect_input, ble_reflect_output);
+  Crcx crc(uint32_t(ble_init), uint32_t(ble_fini), ble_reflect_input,
+           ble_reflect_output);
   crc.update((uint8_t *)&pdu, ((uint8_t *)&pdu) + pdu_len);
 
   uintmax_t expected_uintmax = reflect(0xa4e2c2, ble_crc_n);
@@ -426,14 +428,14 @@ TEST(CRCx, ble_core_52_4_2_1_Legacy_Advertising_PDUs) {
   const size_t pdu_len = PDU_AC_LL_HEADER_SIZE + pdu.len;
 
   using Crcx = Crc<ble_crc_n, uint32_t, uint32_t(ble_poly)>;
-  Crcx crc(uint32_t(ble_init), uint32_t(ble_fini), ble_reflect_input, ble_reflect_output);
+  Crcx crc(uint32_t(ble_init), uint32_t(ble_fini), ble_reflect_input,
+           ble_reflect_output);
   crc.update((uint8_t *)&pdu, ((uint8_t *)&pdu) + pdu_len);
 
   auto expected = 0xb52dd7;
   auto actual = crc.fini();
 
   EXPECT_EQ(actual, expected)
-      << "expected: " << hex << setw(6) << setfill('0') << expected
-      << " "
+      << "expected: " << hex << setw(6) << setfill('0') << expected << " "
       << "actual: " << hex << setw(6) << setfill('0') << actual << " ";
 }
