@@ -27,9 +27,9 @@ constexpr auto generate_array(Generator g)
 }
 
 template <typename T>
-constexpr T reflect(const T &x, const size_t & N = 8 * sizeof(T)) {
+constexpr T reflect(const T &x, const size_t &N = 8 * sizeof(T)) {
 
-  const size_t n = std::min( N, 8 * sizeof(T) );
+  const size_t n = std::min(N, 8 * sizeof(T));
 
   T y = 0;
 
@@ -96,14 +96,18 @@ public:
   void update(uint8_t data) {
 
     if (reflectInput) {
-      data = reflect(data,8);
+      data = reflect(data, 8);
     }
 
     // https://en.wikipedia.org/wiki/Computation_of_cyclic_redundancy_checks#Multi-bit_computation
     uint8_t upper_byte = (lfsr >> (N - 8));
     uint8_t idx = data ^ upper_byte;
 
-    lfsr <<= 8;
+    if (N <= 8) {
+      lfsr = 0;
+    } else {
+      lfsr <<= 8;
+    }
     lfsr &= generator<T, N, polynomial>::mask();
     lfsr ^= table[idx];
   }
