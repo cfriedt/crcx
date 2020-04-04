@@ -210,9 +210,17 @@ TEST(Sanity, invalid_param_to_crcx_init) {
   ASSERT_FALSE(::crcx_init(&ctx, 1, 0, 0, 0x7, false, false));
 }
 
-TEST(Sanity, invalid_ctx_to_crcx_fini) { ASSERT_EQ(::crcx_fini(nullptr), -1); }
+// clang-format off
+TEST(Sanity, invalid_ctx_to_crcx_fini) {
+	ASSERT_EQ(::crcx_fini(nullptr), -1);
+}
+// clang-format on
 
-TEST(Sanity, invalid_ctx_to_crcx) { ASSERT_FALSE(::crcx(nullptr, nullptr, 0)); }
+// clang-format off
+TEST(Sanity, invalid_ctx_to_crcx) {
+	ASSERT_FALSE(::crcx(nullptr, nullptr, 0));
+}
+// clang-format on
 
 // This test shows that the CRC works for a single byte.
 // It also tests to make sure that the input parameters are set accordingly.
@@ -762,7 +770,12 @@ TEST(CRCx, nrf_support1) {
       .addr =
           {
               // note, this is least-significant byte first
-              0x0d, 0xef, 0x84, 0xb7, 0x2d, 0x3c,
+              0x0d,
+              0xef,
+              0x84,
+              0xb7,
+              0x2d,
+              0x3c,
           },
       .data =
           {
@@ -798,7 +811,12 @@ TEST(CRCx, ble_core_52_4_2_1_Legacy_Advertising_PDUs) {
       .addr =
           {
               // note, this is least-significant byte first
-              0xa6, 0xa5, 0xa4, 0xa3, 0xa2, 0xc1,
+              0xa6,
+              0xa5,
+              0xa4,
+              0xa3,
+              0xa2,
+              0xc1,
           },
       .data =
           {

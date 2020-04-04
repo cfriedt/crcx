@@ -19,7 +19,7 @@ AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 
 AC_PROG_CC_C11
-#AX_CXX_COMPILE_STDCXX_11
+AX_CXX_COMPILE_STDCXX(14, noext)
 
 PKG_INSTALLDIR
 
@@ -31,7 +31,7 @@ AC_ARG_WITH(
         [gtest],
         [AS_HELP_STRING(
                 [--with-gtest],
-                [Enable gtest for unit and integration testing]
+                [Enable gtest for unit and integration testing (auto)]
         )]
 )
 AS_IF(
@@ -57,6 +57,21 @@ AS_IF(
         ])
 ])
 AM_CONDITIONAL([HAVE_GTEST],[test "x$have_gtest" = "xyes"])
+
+with_cxx="auto"
+AC_ARG_WITH(
+        [cxx],
+        [AS_HELP_STRING(
+                [--with-cxx],
+                [Build C++ Library (auto)]
+        )]
+)
+AS_IF(
+        [test "x$with_cxx" != "xno"],
+        [have_cxx=yes],
+        [have_cxx=no]
+)
+AM_CONDITIONAL([HAVE_CXX],[test "x$have_cxx" = "xyes"])
 
 # Checks for header files.
 AC_CHECK_HEADERS([inttypes.h stddef.h stdint.h string.h])
@@ -87,6 +102,7 @@ fi
 fi
 AM_CONDITIONAL([HAVE_DOXYGEN], [test -n "$DOXYGEN"])
 AM_COND_IF([HAVE_DOXYGEN], [AC_CONFIG_FILES([docs/Doxyfile])])
+AS_IF([test "x$have_cxx" = "xyes"], [AC_CONFIG_FILES([src/crcxxx.pc])])
 
 AC_CONFIG_FILES([
 	Makefile

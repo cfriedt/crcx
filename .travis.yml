@@ -29,6 +29,10 @@ script:
   - # ensure a simple application can compile and link to libcrcx
   - echo 'extern void crcx_init(); int main() { crcx_init(); return 0; }' > foo.c
   - gcc -o foo foo.c `pkg-config --cflags --libs crcx`
+  - # ensure a simple application can compile and link to libcrcxxx
+  - echo '#include <crcx/crcxxx.h>' > foo.cpp
+  - echo 'using namespace ::crcx; int main() { using Crcx = Crc<8,uint8_t,7>; Crcx crc(0,0,false,false); return 0; }' >> foo.cpp
+  - g++ -o foo foo.cpp `pkg-config --cflags --libs crcxxx`
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)

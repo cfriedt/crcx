@@ -1,12 +1,11 @@
 noinst_PROGRAMS =
 
-AM_CPPFLAGS = -I@top_srcdir@/src
+AM_CPPFLAGS = -I@top_srcdir@/src/
 
 AM_CFLAGS = @GTEST_CFLAGS@
 
-LDADD = \
-	@top_srcdir@/src/lib@PACKAGE_NAME@.la \
-        @GTEST_LIBS@
+AM_LDADD = \
+	@GTEST_LIBS@
 
 if HAVE_GTEST
 
@@ -14,7 +13,13 @@ if HAVE_GTEST
 
 noinst_PROGRAMS += crcx-test
 crcx_test_SOURCES = crcx-test.cpp
-crcx_test_LDLIBS = @GTEST_LIBS@
+crcx_test_LDADD= @top_srcdir@/src/lib@PACKAGE_NAME@.la $(AM_LDADD)
+
+if HAVE_CXX
+noinst_PROGRAMS += crcxxx-test
+crcxxx_test_SOURCES = crcxxx-test.cpp
+crcxxx_test_LDADD = @top_srcdir@/src/lib@PACKAGE_NAME@xx.la $(AM_LDADD)
+endif
 
 check-local:
 	$(MAKE) gtest

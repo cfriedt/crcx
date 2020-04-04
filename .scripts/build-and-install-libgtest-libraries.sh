@@ -14,7 +14,7 @@ cd googletest
 
 # installs headers to /usr/include/gtest /usr/include/gmock
 # install static libraries to /usr/lib
-cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr . && make -j$(nproc --all) all install
+cmake -DCMAKE_CXX_FLAGS="-fPIC" -DCMAKE_INSTALL_PREFIX:PATH=/usr . && make -j$(nproc --all) all install
 # install shared libraries to /usr/lib
-cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr -DBUILD_SHARED_LIBS=ON && make -j$(nproc --all) all install
+cmake -DCMAKE_CXX_FLAGS="-fPIC" -DCMAKE_INSTALL_PREFIX:PATH=/usr -DBUILD_SHARED_LIBS=ON && make -j$(nproc --all) all install
 

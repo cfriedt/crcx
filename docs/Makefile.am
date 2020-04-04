@@ -9,8 +9,7 @@ html: doxyfile.stamp
 CLEANFILES =           \
 	doxyfile.stamp \
 	html           \
-	latex          \
-	Doxyfile
+	latex
 
 all-local: doxyfile.stamp
 
