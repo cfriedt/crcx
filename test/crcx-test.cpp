@@ -225,7 +225,7 @@ TEST(Sanity, invalid_ctx_to_crcx) {
 // This test shows that the CRC works for a single byte.
 // It also tests to make sure that the input parameters are set accordingly.
 // Also, it checks that the LUT is generated correctly.
-TEST(CRCx, Wikipedia_example1) {
+TEST(LibCRCx, Wikipedia_example1) {
   // https://en.wikipedia.org/wiki/Computation_of_cyclic_redundancy_checks#Example
   // compute the 8-bit CRC of the ascii character 'W' (0b01010111, 0x57, 87)
   // CRC-8-ATM (HEC) polynomial x^8 + x^2 + x + 1 => '100000111'
@@ -278,7 +278,7 @@ TEST(CRCx, Wikipedia_example1) {
 }
 
 // this test shows that multi-byte input CRC works
-TEST(CRCx, Sunshine_CRC8) {
+TEST(LibCRCx, Sunshine_CRC8) {
   // http://www.sunshine2k.de/coding/javascript/crc/crc_js.html
   // CRC8
   // input not reflected
@@ -304,7 +304,7 @@ TEST(CRCx, Sunshine_CRC8) {
 }
 
 // this test shows that the final xor value is applied
-TEST(CRCx, Sunshine_CRC8_ITU) {
+TEST(LibCRCx, Sunshine_CRC8_ITU) {
   // http://www.sunshine2k.de/coding/javascript/crc/crc_js.html
   // CRC8_ITU
   // input not reflected
@@ -330,7 +330,7 @@ TEST(CRCx, Sunshine_CRC8_ITU) {
 }
 
 // this test shows that input and output reflection works
-TEST(CRCx, Sunshine_CRC8_DARC) {
+TEST(LibCRCx, Sunshine_CRC8_DARC) {
   // http://www.sunshine2k.de/coding/javascript/crc/crc_js.html
   // CRC8_DARC
   // input reflected
@@ -356,7 +356,7 @@ TEST(CRCx, Sunshine_CRC8_DARC) {
 }
 
 // this test shows that CRC16 works for one byte messages
-TEST(CRCx, Sunshine_CRC16_CCIT_ZERO_one_byte) {
+TEST(LibCRCx, Sunshine_CRC16_CCIT_ZERO_one_byte) {
   // http://www.sunshine2k.de/coding/javascript/crc/crc_js.html
   // CRC16_CCIT_ZERO
   // input not reflected
@@ -413,7 +413,7 @@ TEST(CRCx, Sunshine_CRC16_CCIT_ZERO_one_byte) {
 }
 
 // this test shows that CRC16 works (incrementally)
-TEST(CRCx, Sunshine_CRC16_CCIT_ZERO_incremental) {
+TEST(LibCRCx, Sunshine_CRC16_CCIT_ZERO_incremental) {
   // http://www.sunshine2k.de/coding/javascript/crc/crc_js.html
   // CRC16_CCIT_ZERO
   // input not reflected
@@ -454,7 +454,7 @@ TEST(CRCx, Sunshine_CRC16_CCIT_ZERO_incremental) {
 }
 
 // this test shows that CRC16 works
-TEST(CRCx, Sunshine_CRC16_CCIT_ZERO) {
+TEST(LibCRCx, Sunshine_CRC16_CCIT_ZERO) {
   // http://www.sunshine2k.de/coding/javascript/crc/crc_js.html
   // CRC16_CCIT_ZERO
   // input not reflected
@@ -504,7 +504,7 @@ TEST(CRCx, Sunshine_CRC16_CCIT_ZERO) {
 }
 
 // this test shows that CRC32 works
-TEST(CRCx, Sunshine_CRC32_POSIX) {
+TEST(LibCRCx, Sunshine_CRC32_POSIX) {
   // http://www.sunshine2k.de/coding/javascript/crc/crc_js.html
   // CRC32_POSIX
   // input not reflected
@@ -570,7 +570,7 @@ TEST(CRCx, Sunshine_CRC32_POSIX) {
 }
 
 // this test shows that CRC64 works
-TEST(CRCx, Sunshine_CRC64_ECMA_182) {
+TEST(LibCRCx, Sunshine_CRC64_ECMA_182) {
   // http://www.sunshine2k.de/coding/javascript/crc/crc_js.html
   // CRC64_ECMA_182
   // input not reflected
@@ -635,7 +635,7 @@ TEST(CRCx, Sunshine_CRC64_ECMA_182) {
       << "The calculated CRC is incorrect";
 }
 
-TEST(CRCx, reflect24) {
+TEST(LibCRCx, reflect24) {
   uintmax_t expected_uintmax = 0xabcdef;
   uintmax_t actual_uintmax = ::crcx_reflect(0xf7b3d5, 24);
 
@@ -688,7 +688,7 @@ struct pdu_adv {
   uint8_t data[ADV_DATA_LEN];
 } __attribute__((packed));
 
-TEST(CRCx, board_example1) {
+TEST(LibCRCx, board_example1) {
 
   vector<uint8_t> rxbuf{{0x2c, 0xc5, 0x22, 0x44, 0x05, 0x6b, 0x8e, 0x55, 0x6b,
                          0xcd, 0xde, 0x1e, 0xb0, 0x6f, 0xc0, 0x4a, 0x85, 0x7b,
@@ -757,7 +757,7 @@ TEST(CRCx, board_example1) {
                             << setw(6) << setfill('0') << hw_crc << ")";
 }
 
-TEST(CRCx, nrf_support1) {
+TEST(LibCRCx, nrf_support1) {
   // https://devzone.nordicsemi.com/f/nordic-q-a/679/ble-crc-calculation
 
   const struct pdu_adv pdu = {
@@ -798,7 +798,7 @@ TEST(CRCx, nrf_support1) {
       << "actual: " << hex << setw(6) << setfill('0') << actual_uintmax << " ";
 }
 
-TEST(CRCx, ble_core_52_4_2_1_Legacy_Advertising_PDUs) {
+TEST(LibCRCx, ble_core_52_4_2_1_Legacy_Advertising_PDUs) {
   // https://www.bluetooth.com/specifications/bluetooth-core-specification/
 
   const struct pdu_adv pdu = {

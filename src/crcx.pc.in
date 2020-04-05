@@ -3,8 +3,8 @@ exec_prefix=@exec_prefix@
 libdir=@exec_prefix@/lib
 includedir=@prefix@/include
 
-Name: @PACKAGE_NAME@
-Description: Yet Another CRC Library
+Name: LibCRCx
+Description: The LibCRCx (C API)
 Version: @PACKAGE_VERSION@
-Libs: -L${libdir} -l@PACKAGE_NAME@
+Libs: -L${libdir} -lcrcx
 Cflags: -I${includedir}
