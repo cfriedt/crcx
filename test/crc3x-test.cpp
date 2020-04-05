@@ -2,27 +2,27 @@
 
 #include <gtest/gtest.h>
 
-#include "crcx/crcxxx.h"
+#include "crc3x/crc3x.h"
 
 using namespace std;
-using namespace crcx;
+using namespace crc3x;
 
 // This test shows that the CRC works for a single byte.
 // It also tests to make sure that the input parameters are set accordingly.
 // Also, it checks that the LUT is generated correctly.
-TEST(CRCx, Wikipedia_example1) {
+TEST(LibCRC3x, Wikipedia_example1) {
   // https://en.wikipedia.org/wiki/Computation_of_cyclic_redundancy_checks#Example
   // compute the 8-bit CRC of the ascii character 'W' (0b01010111, 0x57, 87)
   // CRC-8-ATM (HEC) polynomial x^8 + x^2 + x + 1 => '100000111'
 
-  using Crcx = Crc<8, uint8_t, 0x7>;
+  using Crc3x = Crc<8, uint8_t, 0x7>;
 
-  Crcx crc(0, 0, false, false);
+  Crc3x crc(0, 0, false, false);
 
   // This site has a table generator and gives the same output as the wikipedia
   // http://www.sunshine2k.de/coding/javascript/crc/crc_js.html
   // clang-format off
-  decltype(Crcx::table) expected_table = {
+  decltype(Crc3x::table) expected_table = {
 	0x00, 0x07, 0x0E, 0x09, 0x1C, 0x1B, 0x12, 0x15, 0x38, 0x3F, 0x36, 0x31, 0x24, 0x23, 0x2A, 0x2D,
     0x70, 0x77, 0x7E, 0x79, 0x6C, 0x6B, 0x62, 0x65, 0x48, 0x4F, 0x46, 0x41, 0x54, 0x53, 0x5A, 0x5D,
     0xE0, 0xE7, 0xEE, 0xE9, 0xFC, 0xFB, 0xF2, 0xF5, 0xD8, 0xDF, 0xD6, 0xD1, 0xC4, 0xC3, 0xCA, 0xCD,
@@ -42,7 +42,7 @@ TEST(CRCx, Wikipedia_example1) {
   };
   // clang-format on
 
-  auto &actual_table = Crcx::table;
+  auto &actual_table = Crc3x::table;
 
   ASSERT_EQ(actual_table, expected_table) << "The generated table is incorrect";
 
@@ -55,7 +55,7 @@ TEST(CRCx, Wikipedia_example1) {
 }
 
 // this test shows that multi-byte input CRC works
-TEST(CRCx, Sunshine_CRC8) {
+TEST(LibCRC3x, Sunshine_CRC8) {
   // http://www.sunshine2k.de/coding/javascript/crc/crc_js.html
   // CRC8
   // input not reflected
@@ -65,9 +65,9 @@ TEST(CRCx, Sunshine_CRC8) {
   // final xor value: 0
   // CRC Input Data: 0x31 0x32 0x33 0x34 0x35 0x36 0x37 0x38 0x39
 
-  using Crcx = Crc<8, uint8_t, 0x7>;
+  using Crc3x = Crc<8, uint8_t, 0x7>;
 
-  Crcx crc(0, 0, false, false);
+  Crc3x crc(0, 0, false, false);
 
   const vector<uint8_t> data{0x31, 0x32, 0x33, 0x34, 0x35,
                              0x36, 0x37, 0x38, 0x39};
@@ -81,7 +81,7 @@ TEST(CRCx, Sunshine_CRC8) {
 }
 
 // this test shows that the final xor value is applied
-TEST(CRCx, Sunshine_CRC8_ITU) {
+TEST(LibCRC3x, Sunshine_CRC8_ITU) {
   // http://www.sunshine2k.de/coding/javascript/crc/crc_js.html
   // CRC8_ITU
   // input not reflected
@@ -91,9 +91,9 @@ TEST(CRCx, Sunshine_CRC8_ITU) {
   // final xor value: 0x55
   // CRC Input Data: 0x31 0x32 0x33 0x34 0x35 0x36 0x37 0x38 0x39
 
-  using Crcx = Crc<8, uint8_t, 0x7>;
+  using Crc3x = Crc<8, uint8_t, 0x7>;
 
-  Crcx crc(0, 0x55, false, false);
+  Crc3x crc(0, 0x55, false, false);
 
   const vector<uint8_t> data{0x31, 0x32, 0x33, 0x34, 0x35,
                              0x36, 0x37, 0x38, 0x39};
@@ -107,7 +107,7 @@ TEST(CRCx, Sunshine_CRC8_ITU) {
 }
 
 // this test shows that input and output reflection works
-TEST(CRCx, Sunshine_CRC8_DARC) {
+TEST(LibCRC3x, Sunshine_CRC8_DARC) {
   // http://www.sunshine2k.de/coding/javascript/crc/crc_js.html
   // CRC8_DARC
   // input reflected
@@ -117,9 +117,9 @@ TEST(CRCx, Sunshine_CRC8_DARC) {
   // final xor value: 0
   // CRC Input Data: 0x31 0x32 0x33 0x34 0x35 0x36 0x37 0x38 0x39
 
-  using Crcx = Crc<8, uint8_t, 0x39>;
+  using Crc3x = Crc<8, uint8_t, 0x39>;
 
-  Crcx crc(0, 0, true, true);
+  Crc3x crc(0, 0, true, true);
 
   const vector<uint8_t> data{0x31, 0x32, 0x33, 0x34, 0x35,
                              0x36, 0x37, 0x38, 0x39};
@@ -133,7 +133,7 @@ TEST(CRCx, Sunshine_CRC8_DARC) {
 }
 
 // this test shows that CRC16 works for one byte messages
-TEST(CRCx, Sunshine_CRC16_CCIT_ZERO_one_byte) {
+TEST(LibCRC3x, Sunshine_CRC16_CCIT_ZERO_one_byte) {
   // http://www.sunshine2k.de/coding/javascript/crc/crc_js.html
   // CRC16_CCIT_ZERO
   // input not reflected
@@ -143,9 +143,9 @@ TEST(CRCx, Sunshine_CRC16_CCIT_ZERO_one_byte) {
   // final xor value: 0
   // CRC Input Data: 'W'
 
-  using Crcx = Crc<16, uint16_t, 0x1021>;
+  using Crc3x = Crc<16, uint16_t, 0x1021>;
 
-  Crcx crc(0, 0, false, false);
+  Crc3x crc(0, 0, false, false);
 
   const vector<uint8_t> data{'W'};
 
@@ -158,7 +158,7 @@ TEST(CRCx, Sunshine_CRC16_CCIT_ZERO_one_byte) {
 }
 
 // this test shows that CRC16 works
-TEST(CRCx, Sunshine_CRC16_CCIT_ZERO) {
+TEST(LibCRC3x, Sunshine_CRC16_CCIT_ZERO) {
   // http://www.sunshine2k.de/coding/javascript/crc/crc_js.html
   // CRC16_CCIT_ZERO
   // input not reflected
@@ -168,9 +168,9 @@ TEST(CRCx, Sunshine_CRC16_CCIT_ZERO) {
   // final xor value: 0
   // CRC Input Data: 0x31 0x32 0x33 0x34 0x35 0x36 0x37 0x38 0x39
 
-  using Crcx = Crc<16, uint16_t, 0x1021>;
+  using Crc3x = Crc<16, uint16_t, 0x1021>;
 
-  Crcx crc(0, 0, false, false);
+  Crc3x crc(0, 0, false, false);
 
   const vector<uint8_t> data{0x31, 0x32, 0x33, 0x34, 0x35,
                              0x36, 0x37, 0x38, 0x39};
@@ -184,7 +184,7 @@ TEST(CRCx, Sunshine_CRC16_CCIT_ZERO) {
 }
 
 // this test shows that CRC32 works
-TEST(CRCx, Sunshine_CRC32_POSIX) {
+TEST(LibCRC3x, Sunshine_CRC32_POSIX) {
   // http://www.sunshine2k.de/coding/javascript/crc/crc_js.html
   // CRC32_POSIX
   // input not reflected
@@ -194,9 +194,9 @@ TEST(CRCx, Sunshine_CRC32_POSIX) {
   // final xor value: -1
   // CRC Input Data: 0x31 0x32 0x33 0x34 0x35 0x36 0x37 0x38 0x39
 
-  using Crcx = Crc<32, uint32_t, 0x4c11db7>;
+  using Crc3x = Crc<32, uint32_t, 0x4c11db7>;
 
-  Crcx crc(0, -1, false, false);
+  Crc3x crc(0, -1, false, false);
 
   const vector<uint8_t> data{0x31, 0x32, 0x33, 0x34, 0x35,
                              0x36, 0x37, 0x38, 0x39};
@@ -210,7 +210,7 @@ TEST(CRCx, Sunshine_CRC32_POSIX) {
 }
 
 // this test shows that CRC64 works
-TEST(CRCx, Sunshine_CRC64_ECMA_182) {
+TEST(LibCRC3x, Sunshine_CRC64_ECMA_182) {
   // http://www.sunshine2k.de/coding/javascript/crc/crc_js.html
   // CRC64_ECMA_182
   // input not reflected
@@ -220,9 +220,9 @@ TEST(CRCx, Sunshine_CRC64_ECMA_182) {
   // final xor value: 0
   // CRC Input Data: 0x31 0x32 0x33 0x34 0x35 0x36 0x37 0x38 0x39
 
-  using Crcx = Crc<64, uint64_t, 0x42F0E1EBA9EA3693>;
+  using Crc3x = Crc<64, uint64_t, 0x42F0E1EBA9EA3693>;
 
-  Crcx crc(0, 0, false, false);
+  Crc3x crc(0, 0, false, false);
 
   const vector<uint8_t> data{0x31, 0x32, 0x33, 0x34, 0x35,
                              0x36, 0x37, 0x38, 0x39};
@@ -235,7 +235,7 @@ TEST(CRCx, Sunshine_CRC64_ECMA_182) {
   EXPECT_EQ(actual, expected) << "The calculated CRC is incorrect";
 }
 
-TEST(CRCx, reflect24) {
+TEST(LibCRC3x, reflect24) {
   uintmax_t expected_uintmax = 0xabcdef;
   uintmax_t actual_uintmax = reflect(0xf7b3d5, 24);
 
@@ -288,7 +288,7 @@ struct pdu_adv {
   uint8_t data[ADV_DATA_LEN];
 } __attribute__((packed));
 
-TEST(CRCx, board_example1) {
+TEST(LibCRC3x, board_example1) {
 
   vector<uint8_t> rxbuf{{0x2c, 0xc5, 0x22, 0x44, 0x05, 0x6b, 0x8e, 0x55, 0x6b,
                          0xcd, 0xde, 0x1e, 0xb0, 0x6f, 0xc0, 0x4a, 0x85, 0x7b,
@@ -323,9 +323,9 @@ TEST(CRCx, board_example1) {
 
   const uint32_t wireshark_crc(0x0801bd);
 
-  using Crcx = Crc<ble_crc_n, uint32_t, uint32_t(ble_poly)>;
-  Crcx crc(uint32_t(ble_init), uint32_t(ble_fini), ble_reflect_input,
-           ble_reflect_output);
+  using Crc3x = Crc<ble_crc_n, uint32_t, uint32_t(ble_poly)>;
+  Crc3x crc(uint32_t(ble_init), uint32_t(ble_fini), ble_reflect_input,
+            ble_reflect_output);
   crc.update(data, data + len);
   uintmax_t sw_crc = crc.fini();
 
@@ -357,7 +357,7 @@ TEST(CRCx, board_example1) {
                             << setw(6) << setfill('0') << hw_crc << ")";
 }
 
-TEST(CRCx, nrf_support1) {
+TEST(LibCRC3x, nrf_support1) {
   // https://devzone.nordicsemi.com/f/nordic-q-a/679/ble-crc-calculation
 
   const struct pdu_adv pdu = {
@@ -385,9 +385,9 @@ TEST(CRCx, nrf_support1) {
   };
   const size_t pdu_len = PDU_AC_LL_HEADER_SIZE + pdu.len;
 
-  using Crcx = Crc<ble_crc_n, uint32_t, uint32_t(ble_poly)>;
-  Crcx crc(uint32_t(ble_init), uint32_t(ble_fini), ble_reflect_input,
-           ble_reflect_output);
+  using Crc3x = Crc<ble_crc_n, uint32_t, uint32_t(ble_poly)>;
+  Crc3x crc(uint32_t(ble_init), uint32_t(ble_fini), ble_reflect_input,
+            ble_reflect_output);
   crc.update((uint8_t *)&pdu, ((uint8_t *)&pdu) + pdu_len);
 
   uintmax_t expected_uintmax = reflect(0xa4e2c2, ble_crc_n);
@@ -399,7 +399,7 @@ TEST(CRCx, nrf_support1) {
       << "actual: " << hex << setw(6) << setfill('0') << actual_uintmax << " ";
 }
 
-TEST(CRCx, ble_core_52_4_2_1_Legacy_Advertising_PDUs) {
+TEST(LibCRC3x, ble_core_52_4_2_1_Legacy_Advertising_PDUs) {
   // https://www.bluetooth.com/specifications/bluetooth-core-specification/
 
   const struct pdu_adv pdu = {
@@ -427,9 +427,9 @@ TEST(CRCx, ble_core_52_4_2_1_Legacy_Advertising_PDUs) {
   };
   const size_t pdu_len = PDU_AC_LL_HEADER_SIZE + pdu.len;
 
-  using Crcx = Crc<ble_crc_n, uint32_t, uint32_t(ble_poly)>;
-  Crcx crc(uint32_t(ble_init), uint32_t(ble_fini), ble_reflect_input,
-           ble_reflect_output);
+  using Crc3x = Crc<ble_crc_n, uint32_t, uint32_t(ble_poly)>;
+  Crc3x crc(uint32_t(ble_init), uint32_t(ble_fini), ble_reflect_input,
+            ble_reflect_output);
   crc.update((uint8_t *)&pdu, ((uint8_t *)&pdu) + pdu_len);
 
   auto expected = 0xb52dd7;

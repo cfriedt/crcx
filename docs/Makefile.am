@@ -1,16 +1,17 @@
 if HAVE_DOXYGEN
 
-doxyfile.stamp:
+doxyfile.stamp: Doxyfile
 	$(DOXYGEN)
 	touch $@
 
 html: doxyfile.stamp
 
 CLEANFILES =           \
-	doxyfile.stamp \
-	html           \
-	latex
+	doxyfile.stamp
 
 all-local: doxyfile.stamp
+
+clean-local:
+	rm -Rf html latex
 
 endif

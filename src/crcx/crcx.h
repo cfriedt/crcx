@@ -25,18 +25,17 @@
 /**
  * @file
  *
- * CRCx - yet another CRC Library
+ * LibCRCx - The C API
  *
- * Typical use cases of CRCx would do something like the following:
+ * Typical use cases of libcrcx would be something like the following:
  *
  * @code{.c}
- * #include <crcx.h>
+ * #include <crcx/crcx.h>
  * int main() {
  *   const char data[] = { 'W' };
  *   struct crcx_ctx ctx = {};
- *   // Initialize an n-bit CRC. Here n=8.
- *   // Note, polynomial (here, 0x107) can be (at most) n+1 bits. Different
- *   // CRC algorithms may have non-zero init, fini, and reflection parameters.
+ *   // Initialize an 8-bit CRC with no initializer or finalizer, where
+ *   // neither the input or output is reflected (in that order).
  *   crcx_init(&ctx, 8, 0, 0, 0x107, false, false);
  *   crcx(&ctx, data, sizeof(data));
  *   uintmax_t crc = crcx_fini(&ctx);
@@ -159,7 +158,7 @@ uintmax_t crcx_fini(struct crcx_ctx *ctx);
  *
  * Warning: This function does not do any input validation.
  *
- * Typical use cases should use @ref crcx.
+ * Typical ueses should be via @ref crcx.
  *
  * @param ctx   the CRC context to update
  * @param data  the data for which the CRC should be updated

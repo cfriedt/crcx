@@ -13,12 +13,12 @@ if HAVE_GTEST
 
 noinst_PROGRAMS += crcx-test
 crcx_test_SOURCES = crcx-test.cpp
-crcx_test_LDADD= @top_srcdir@/src/lib@PACKAGE_NAME@.la $(AM_LDADD)
+crcx_test_LDADD= @top_srcdir@/src/libcrcx.la $(AM_LDADD)
 
 if HAVE_CXX
-noinst_PROGRAMS += crcxxx-test
-crcxxx_test_SOURCES = crcxxx-test.cpp
-crcxxx_test_LDADD = @top_srcdir@/src/lib@PACKAGE_NAME@xx.la $(AM_LDADD)
+noinst_PROGRAMS += crc3x-test
+crc3x_test_SOURCES = crc3x-test.cpp
+crc3x_test_LDADD = @top_srcdir@/src/libcrc3x.la $(AM_LDADD)
 endif
 
 check-local:

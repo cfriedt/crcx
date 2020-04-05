@@ -5,18 +5,18 @@ AM_CXXFLAGS = \
 
 lib_LTLIBRARIES =  \
 	libcrcx.la     \
-	libcrcxxx.la
+	libcrc3x.la
 
-libcrcxxx_la_SOURCES = \
-	crcxxx.cpp
+libcrc3x_la_SOURCES = \
+	crc3x.cpp
 
 libcrcx_la_SOURCES = \
 	crcx.c
 
 nobase_include_HEADERS = \
 	crcx/crcx.h          \
-	crcx/crcxxx.h
+	crc3x/crc3x.h
 
 pkgconfig_DATA = \
 	crcx.pc      \
-	crcxxx.pc
+	crc3x.pc
