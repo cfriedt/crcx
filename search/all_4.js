@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['mask',['mask',['../structcrcx__ctx.html#ad6eb05e398c22e07d253858758f6c0a5',1,'crcx_ctx']]],
-  ['msb',['msb',['../structcrcx__ctx.html#a9a27bfcb942db212ed3a0da35e05cdd1',1,'crcx_ctx']]]
+  ['lfsr',['lfsr',['../classcrc3x_1_1Crc.html#a5366b669888f02c62bab70ad684801fe',1,'crc3x::Crc::lfsr()'],['../structcrcx__ctx.html#a88d0654f90ec9480bd993d86574c26e0',1,'crcx_ctx::lfsr()']]]
 ];

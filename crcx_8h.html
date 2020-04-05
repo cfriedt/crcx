@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.13"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>crcx: src/crcx.h File Reference</title>
+<title>LibCRCx: crcx.h File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -21,7 +21,8 @@
  <tbody>
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname">crcx
+   <div id="projectname">LibCRCx
+   &#160;<span id="projectnumber">0.1</span>
    </div>
   </td>
  </tr>
@@ -58,7 +59,7 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_c23e1aac74f176faf2654d1c277defbd.html">crcx</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -70,7 +71,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>CRCx - yet another CRC Library.  
+<p>LibCRCx - The C API.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &lt;stdbool.h&gt;</code><br />
 <code>#include &lt;stddef.h&gt;</code><br />
@@ -79,7 +80,9 @@ $(function() {
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for crcx.h:</div>
 <div class="dyncontent">
-<div class="center"><img src="crcx_8h__incl.png" border="0" usemap="#src_2crcx_8h" alt=""/></div>
+<div class="center"><img src="crcx_8h__incl.png" border="0" usemap="#crcx_8h" alt=""/></div>
+<map name="crcx_8h" id="crcx_8h">
+</map>
 </div>
 </div>
 <p><a href="crcx_8h_source.html">Go to the source code of this file.</a></p>
@@ -115,9 +118,9 @@ Functions</h2></td></tr>
 <tr class="separator:ad9e11cffb5535fb54e12a60ca4e919d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>CRCx - yet another CRC Library. </p>
-<p>Typical use cases of CRCx would do something like the following:</p>
-<div class="fragment"><div class="line"><span class="preprocessor">#include &lt;<a class="code" href="crcx_8h.html">crcx.h</a>&gt;</span></div><div class="line"><span class="keywordtype">int</span> main() {</div><div class="line">  <span class="keyword">const</span> <span class="keywordtype">char</span> data[] = { <span class="charliteral">&#39;W&#39;</span> };</div><div class="line">  <span class="keyword">struct </span><a class="code" href="structcrcx__ctx.html">crcx_ctx</a> ctx = {};</div><div class="line">  <span class="comment">// Initialize an n-bit CRC. Here n=8.</span></div><div class="line">  <span class="comment">// Note, polynomial (here, 0x107) can be (at most) n+1 bits. Different</span></div><div class="line">  <span class="comment">// CRC algorithms may have non-zero init, fini, and reflection parameters.</span></div><div class="line">  <a class="code" href="crcx_8h.html#ad7d341ff88d76773f12dafa6eabc676c">crcx_init</a>(&amp;ctx, 8, 0, 0, 0x107, <span class="keyword">false</span>, <span class="keyword">false</span>);</div><div class="line">  <a class="code" href="crcx_8h.html#ad9e11cffb5535fb54e12a60ca4e919d3">crcx</a>(&amp;ctx, data, <span class="keyword">sizeof</span>(data));</div><div class="line">  uintmax_t crc = <a class="code" href="crcx_8h.html#a7a86e4e61ce169398e488c450ca8962f">crcx_fini</a>(&amp;ctx);</div><div class="line">  <span class="comment">// The value of crc should be 0xa2.</span></div><div class="line">  <span class="keywordflow">return</span> 0;</div><div class="line">}</div></div><!-- fragment --> </div><h2 class="groupheader">Function Documentation</h2>
+<div class="textblock"><p>LibCRCx - The C API. </p>
+<p>Typical use cases of libcrcx would be something like the following:</p>
+<div class="fragment"><div class="line"><span class="preprocessor">#include &lt;<a class="code" href="crcx_8h.html">crcx/crcx.h</a>&gt;</span></div><div class="line"><span class="keywordtype">int</span> main() {</div><div class="line">  <span class="keyword">const</span> <span class="keywordtype">char</span> data[] = { <span class="charliteral">&#39;W&#39;</span> };</div><div class="line">  <span class="keyword">struct </span><a class="code" href="structcrcx__ctx.html">crcx_ctx</a> ctx = {};</div><div class="line">  <span class="comment">// Initialize an 8-bit CRC with no initializer or finalizer, where</span></div><div class="line">  <span class="comment">// neither the input or output is reflected (in that order).</span></div><div class="line">  <a class="code" href="crcx_8h.html#ad7d341ff88d76773f12dafa6eabc676c">crcx_init</a>(&amp;ctx, 8, 0, 0, 0x107, <span class="keyword">false</span>, <span class="keyword">false</span>);</div><div class="line">  <a class="code" href="crcx_8h.html#ad9e11cffb5535fb54e12a60ca4e919d3">crcx</a>(&amp;ctx, data, <span class="keyword">sizeof</span>(data));</div><div class="line">  uintmax_t crc = <a class="code" href="crcx_8h.html#a7a86e4e61ce169398e488c450ca8962f">crcx_fini</a>(&amp;ctx);</div><div class="line">  <span class="comment">// The value of crc should be 0xa2.</span></div><div class="line">  <span class="keywordflow">return</span> 0;</div><div class="line">}</div></div><!-- fragment --> </div><h2 class="groupheader">Function Documentation</h2>
 <a id="ad9e11cffb5535fb54e12a60ca4e919d3"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad9e11cffb5535fb54e12a60ca4e919d3">&#9670;&nbsp;</a></span>crcx()</h2>
 
@@ -366,7 +369,7 @@ Functions</h2></td></tr>
 
 <p>Update the CRC calculation with new <code>data</code>. </p>
 <p>Warning: This function does not do any input validation.</p>
-<p>Typical use cases should use <a class="el" href="crcx_8h.html#ad9e11cffb5535fb54e12a60ca4e919d3">crcx</a>.</p>
+<p>Typical ueses should be via <a class="el" href="crcx_8h.html#ad9e11cffb5535fb54e12a60ca4e919d3">crcx</a>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">ctx</td><td>the CRC context to update </td></tr>

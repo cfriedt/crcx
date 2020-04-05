@@ -1,5 +1,9 @@
 var searchData=
 [
+  ['checktemplateparameters',['checkTemplateParameters',['../structcrc3x_1_1generator.html#af4f8eadbe79d70afe2fcc4d6857b70cb',1,'crc3x::generator']]],
+  ['crc',['Crc',['../classcrc3x_1_1Crc.html',1,'crc3x::Crc&lt; N, T, polynomial &gt;'],['../classcrc3x_1_1Crc.html#a5492ad0ed4db1e1509495fe7e3f9276d',1,'crc3x::Crc::Crc()']]],
+  ['crc3x_2eh',['crc3x.h',['../crc3x_8h.html',1,'']]],
+  ['crc_5ftype',['crc_type',['../classcrc3x_1_1Crc.html#a56e7a7ee3b0702515ffb29db47a25ea2',1,'crc3x::Crc']]],
   ['crcx',['crcx',['../crcx_8h.html#ad9e11cffb5535fb54e12a60ca4e919d3',1,'crcx.c']]],
   ['crcx_2eh',['crcx.h',['../crcx_8h.html',1,'']]],
   ['crcx_5fctx',['crcx_ctx',['../structcrcx__ctx.html',1,'']]],

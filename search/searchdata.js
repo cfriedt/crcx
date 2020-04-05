@@ -1,10 +1,11 @@
 var indexSectionsWithContent =
 {
-  0: "cfilmnprt",
-  1: "c",
+  0: "cfgilmnprtu",
+  1: "cg",
   2: "c",
-  3: "c",
-  4: "filmnprt"
+  3: "cfmu",
+  4: "filmnprt",
+  5: "c"
 };
 
 var indexSectionNames =
@@ -13,7 +14,8 @@ var indexSectionNames =
   1: "classes",
   2: "files",
   3: "functions",
-  4: "variables"
+  4: "variables",
+  5: "typedefs"
 };
 
 var indexSectionLabels =
@@ -22,6 +24,7 @@ var indexSectionLabels =
   1: "Data Structures",
   2: "Files",
   3: "Functions",
-  4: "Variables"
+  4: "Variables",
+  5: "Typedefs"
 };
 
