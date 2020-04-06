@@ -329,32 +329,10 @@ TEST(LibCRC3x, board_example1) {
   crc.update(data, data + len);
   uintmax_t sw_crc = crc.fini();
 
-  /* When hardware CRC checking (filtering) is enabled on this radio, no packets
-   * are received beyond the advertising packets.
-   * When hardware CRC filtering is disabled on this radio, packets are received
-   * beyond advertising packets, but the
-   * crc reported by the radio is incorrect. It would seem that the CRC hardware
-   * is not being properly configured.
-   */
-
-  // When comparing for EQ, fails with message HW CRC (bd8010) does not match
-  // Wireshark CRC (0801bd)
-  EXPECT_NE(hw_crc, wireshark_crc)
-      << "HW CRC (" << hex << setw(6) << setfill('0') << hw_crc
-      << ") does not match Wireshark CRC (" << hex << setw(6) << setfill('0')
-      << wireshark_crc << ")";
-
-  // Succeeds
   EXPECT_EQ(sw_crc, wireshark_crc)
       << "SW CRC (" << hex << setw(6) << setfill('0') << sw_crc
       << ") does not match Wireshark CRC (" << hex << setw(6) << setfill('0')
       << wireshark_crc << ")";
-
-  // When comparing for EQ, fails with message SW CRC (0801bd) does not match HW
-  // CRC (bd8010)
-  EXPECT_NE(sw_crc, hw_crc) << "SW CRC (" << hex << setw(6) << setfill('0')
-                            << sw_crc << ") does not match HW CRC (" << hex
-                            << setw(6) << setfill('0') << hw_crc << ")";
 }
 
 TEST(LibCRC3x, nrf_support1) {

@@ -35,14 +35,14 @@
  * @code{.cpp}
  * #include <vector>
  *
- * #include <crcx/crc3x.h>
+ * #include <crc3x/crc3x.h>
  *
  * using namespace std;
  * using nampespace ::crc3x;
  *
  * int main() {
  *   vector<uin8t_t> data = { 'W' };
- *   // Initialize an 8-bit CRC with polynomial 0x[1]07
+ *   // Initialize an 8-bit CRC with polynomial 0x07
  *   // The C++ API checks template parameters for correctness
  *   using Crc3x = Crc<8,uint8_t,0x07>;
  *   Crc3x crc(0, 0, false, false);

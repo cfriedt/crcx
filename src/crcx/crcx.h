@@ -33,10 +33,11 @@
  * #include <crcx/crcx.h>
  * int main() {
  *   const char data[] = { 'W' };
+ *   // for embedded, consider making this either static or heap allocated (e.g. with malloc(3))
  *   struct crcx_ctx ctx = {};
  *   // Initialize an 8-bit CRC with no initializer or finalizer, where
  *   // neither the input or output is reflected (in that order).
- *   crcx_init(&ctx, 8, 0, 0, 0x107, false, false);
+ *   crcx_init(&ctx, 8, 0, 0, 0x07, false, false);
  *   crcx(&ctx, data, sizeof(data));
  *   uintmax_t crc = crcx_fini(&ctx);
  *   // The value of crc should be 0xa2.
