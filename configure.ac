@@ -21,6 +21,9 @@ AC_PROG_MAKE_SET
 AC_PROG_CC_C11
 AX_CXX_COMPILE_STDCXX(17, noext)
 
+AX_AM_MACROS_STATIC
+AX_CODE_COVERAGE()
+
 PKG_INSTALLDIR
 
 # Checks for libraries.
@@ -105,6 +108,8 @@ AM_COND_IF([HAVE_DOXYGEN], [AC_CONFIG_FILES([docs/Doxyfile])])
 AS_IF([test "x$have_cxx" = "xyes"], [AC_CONFIG_FILES([src/crc3x.pc])])
 
 AC_ARG_ENABLE([debug],AS_HELP_STRING([--enable-debug],[Enable debugging]),,[enable_debug="no"])
+# coverage implies debug
+AS_IF([test "x$enable_code_coverage" = "xyes"], [enable_debug=yes])
 AS_IF([test "x$enable_debug" = "xyes"], [
     CXXFLAGS="${CXXFLAGS} -g -O0 -DDEBUG"
 	CFLAGS="${CFLAGS} -g -O0 -DDEBUG"

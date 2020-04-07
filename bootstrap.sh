@@ -1,9 +1,9 @@
 #!/bin/sh
 
 if [ "$1" = "clean" ]; then
-  make clean &>/dev/null
-  make distclean &>/dev/null
-  make maintainer-clean &>/dev/null
+  make clean >/dev/null 2>&1
+  make distclean >/dev/null 2>&1
+  make maintainer-clean >/dev/null 2>&1
   rm -Rf \
     $(find . \
       -name '*~' \
@@ -41,7 +41,16 @@ if [ "$1" = "clean" ]; then
       -o -name '*.la' \
       -o -name '*.log' \
       -o -name '*.scan' \
-  )
+      -o -name '*.gcno' \
+      -o -name '*.gcna' \
+      -o -name '*.gcda' \
+      -o -name '*.gcov' \
+      -o -name '*-test' \
+      -o -name '*.stamp' \
+      -o -name '*.pc' \
+  ) \
+  aminclude_static.am \
+  docs/html/
   exit 0
 fi
 
