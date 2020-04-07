@@ -15,7 +15,7 @@ TEST(LibCRC3x, Wikipedia_example1) {
   // compute the 8-bit CRC of the ascii character 'W' (0b01010111, 0x57, 87)
   // CRC-8-ATM (HEC) polynomial x^8 + x^2 + x + 1 => '100000111'
 
-  using Crc3x = Crc<8, uint8_t, 0x7>;
+  using Crc3x = Crc<uint8_t, 8, 0x7>;
 
   Crc3x crc(0, 0, false, false);
 
@@ -65,7 +65,7 @@ TEST(LibCRC3x, Sunshine_CRC8) {
   // final xor value: 0
   // CRC Input Data: 0x31 0x32 0x33 0x34 0x35 0x36 0x37 0x38 0x39
 
-  using Crc3x = Crc<8, uint8_t, 0x7>;
+  using Crc3x = Crc<uint8_t, 8, 0x7>;
 
   Crc3x crc(0, 0, false, false);
 
@@ -91,7 +91,7 @@ TEST(LibCRC3x, Sunshine_CRC8_ITU) {
   // final xor value: 0x55
   // CRC Input Data: 0x31 0x32 0x33 0x34 0x35 0x36 0x37 0x38 0x39
 
-  using Crc3x = Crc<8, uint8_t, 0x7>;
+  using Crc3x = Crc<uint8_t, 8, 0x7>;
 
   Crc3x crc(0, 0x55, false, false);
 
@@ -117,7 +117,7 @@ TEST(LibCRC3x, Sunshine_CRC8_DARC) {
   // final xor value: 0
   // CRC Input Data: 0x31 0x32 0x33 0x34 0x35 0x36 0x37 0x38 0x39
 
-  using Crc3x = Crc<8, uint8_t, 0x39>;
+  using Crc3x = Crc<uint8_t, 8, 0x39>;
 
   Crc3x crc(0, 0, true, true);
 
@@ -143,7 +143,7 @@ TEST(LibCRC3x, Sunshine_CRC16_CCIT_ZERO_one_byte) {
   // final xor value: 0
   // CRC Input Data: 'W'
 
-  using Crc3x = Crc<16, uint16_t, 0x1021>;
+  using Crc3x = Crc<uint16_t, 16, 0x1021>;
 
   Crc3x crc(0, 0, false, false);
 
@@ -168,7 +168,7 @@ TEST(LibCRC3x, Sunshine_CRC16_CCIT_ZERO) {
   // final xor value: 0
   // CRC Input Data: 0x31 0x32 0x33 0x34 0x35 0x36 0x37 0x38 0x39
 
-  using Crc3x = Crc<16, uint16_t, 0x1021>;
+  using Crc3x = Crc<uint16_t, 16, 0x1021>;
 
   Crc3x crc(0, 0, false, false);
 
@@ -194,7 +194,7 @@ TEST(LibCRC3x, Sunshine_CRC32_POSIX) {
   // final xor value: -1
   // CRC Input Data: 0x31 0x32 0x33 0x34 0x35 0x36 0x37 0x38 0x39
 
-  using Crc3x = Crc<32, uint32_t, 0x4c11db7>;
+  using Crc3x = Crc<uint32_t, 32, 0x4c11db7>;
 
   Crc3x crc(0, -1, false, false);
 
@@ -220,7 +220,7 @@ TEST(LibCRC3x, Sunshine_CRC64_ECMA_182) {
   // final xor value: 0
   // CRC Input Data: 0x31 0x32 0x33 0x34 0x35 0x36 0x37 0x38 0x39
 
-  using Crc3x = Crc<64, uint64_t, 0x42F0E1EBA9EA3693>;
+  using Crc3x = Crc<uint64_t, 64, 0x42F0E1EBA9EA3693>;
 
   Crc3x crc(0, 0, false, false);
 
@@ -323,7 +323,7 @@ TEST(LibCRC3x, board_example1) {
 
   const uint32_t wireshark_crc(0x0801bd);
 
-  using Crc3x = Crc<ble_crc_n, uint32_t, uint32_t(ble_poly)>;
+  using Crc3x = Crc<uint32_t, ble_crc_n, uint32_t(ble_poly)>;
   Crc3x crc(uint32_t(ble_init), uint32_t(ble_fini), ble_reflect_input,
             ble_reflect_output);
   crc.update(data, data + len);
@@ -363,7 +363,7 @@ TEST(LibCRC3x, nrf_support1) {
   };
   const size_t pdu_len = PDU_AC_LL_HEADER_SIZE + pdu.len;
 
-  using Crc3x = Crc<ble_crc_n, uint32_t, uint32_t(ble_poly)>;
+  using Crc3x = Crc<uint32_t, ble_crc_n, uint32_t(ble_poly)>;
   Crc3x crc(uint32_t(ble_init), uint32_t(ble_fini), ble_reflect_input,
             ble_reflect_output);
   crc.update((uint8_t *)&pdu, ((uint8_t *)&pdu) + pdu_len);
@@ -405,7 +405,7 @@ TEST(LibCRC3x, ble_core_52_4_2_1_Legacy_Advertising_PDUs) {
   };
   const size_t pdu_len = PDU_AC_LL_HEADER_SIZE + pdu.len;
 
-  using Crc3x = Crc<ble_crc_n, uint32_t, uint32_t(ble_poly)>;
+  using Crc3x = Crc<uint32_t, ble_crc_n, uint32_t(ble_poly)>;
   Crc3x crc(uint32_t(ble_init), uint32_t(ble_fini), ble_reflect_input,
             ble_reflect_output);
   crc.update((uint8_t *)&pdu, ((uint8_t *)&pdu) + pdu_len);

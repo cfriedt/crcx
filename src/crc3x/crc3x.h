@@ -44,7 +44,7 @@
  *   vector<uin8t_t> data = { 'W' };
  *   // Initialize an 8-bit CRC with polynomial 0x07
  *   // The C++ API checks template parameters for correctness
- *   using Crc3x = Crc<8,uint8_t,0x07>;
+ *   using Crc3x = Crc<uint8_t,8,0x07>;
  *   Crc3x crc(0, 0, false, false);
  *   crc.update(data.begin(), data.end());
  *   Crc3x::crc_type result = crc.fini();
@@ -199,7 +199,7 @@ struct generator {
  * href="https://en.wikipedia.org/wiki/Cyclic_redundancy_check#Polynomial_representations_of_cyclic_redundancy_checks">Polynomial
  * representations of cyclic redundancy checks</a>
  */
-template <std::size_t N, typename T, T polynomial> class Crc {
+template <typename T, std::size_t N, T polynomial> class Crc {
 
 public:
   /**

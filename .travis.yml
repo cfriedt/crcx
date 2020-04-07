@@ -15,7 +15,6 @@ addons:
       - clang-tidy
       - cmake
       - doxygen
-      - gcovr
       - graphviz
       - lcov
 
@@ -33,7 +32,7 @@ script:
   - gcc -o foo foo.c `pkg-config --cflags --libs crcx`
   - # ensure a simple application can compile and link to libcrcxxx
   - echo '#include <crc3x/crc3x.h>' > foo.cpp
-  - echo 'using namespace ::crc3x; int main() { using Crc3x = Crc<8,uint8_t,7>; Crc3x crc(0,0,false,false); return 0; }' >> foo.cpp
+  - echo 'using namespace ::crc3x; int main() { using Crc3x = Crc<uint8_t,8,7>; Crc3x crc(0,0,false,false); return 0; }' >> foo.cpp
   - g++ -o foo foo.cpp `pkg-config --cflags --libs crc3x`
 
 after_success:
