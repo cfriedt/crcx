@@ -41,7 +41,6 @@
 #define MIN(a, b) ((a) <= (b) ? (a) : (b))
 #endif
 
-#undef DEBUG
 #if defined(DEBUG)
 #include <stdio.h>
 #define D(fmt, args...)                                                        \
@@ -168,7 +167,6 @@ bool crcx_generate_table(struct crcx_ctx *ctx) {
 
 bool crcx_init(struct crcx_ctx *ctx, uint8_t n, uintmax_t init, uintmax_t fini,
                uintmax_t poly, bool reflect_input, bool reflect_output) {
-  D("");
 
   SET(uintmax_t, ctx->n, n);
   SET(uintmax_t, ctx->poly, poly);
@@ -231,7 +229,6 @@ void crcx_update(struct crcx_ctx *ctx, uint8_t data) {
 }
 
 bool crcx(struct crcx_ctx *ctx, const void *data, const size_t len) {
-  D("");
 
   if (!crcx_valid(ctx)) {
     return false;
