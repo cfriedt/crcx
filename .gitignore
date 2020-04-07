@@ -1,14 +1,15 @@
 /html/
 /latex/
 *-test
-*.gcno
 *.pc
 *.o
 *.a
 *.la
 *.lo
 *.so
+*.gcno
 *.gcda
+*.gcov
 *.stamp
 *.clangtidy
 /.*project
@@ -33,3 +34,4 @@ stamp-h1
 /config.*
 /docs/html/
 /docs/latex/
+aminclude_static.am
