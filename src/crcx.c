@@ -168,7 +168,7 @@ bool crcx_generate_table(struct crcx_ctx *ctx) {
 bool crcx_init(struct crcx_ctx *ctx, uint8_t n, uintmax_t init, uintmax_t fini,
                uintmax_t poly, bool reflect_input, bool reflect_output) {
 
-  SET(uintmax_t, ctx->n, n);
+  SET(uint8_t, ctx->n, n);
   SET(uintmax_t, ctx->poly, poly);
   SET(bool, ctx->reflect_input, reflect_input);
   SET(bool, ctx->reflect_output, reflect_output);
