@@ -8,6 +8,20 @@
 
 A simple, straightforward [CRC](https://en.wikipedia.org/wiki/Cyclic_redundancy_check) library that uses [lookup-tables](https://en.wikipedia.org/wiki/Lookup_table).
 
+LibCRCx has been tested on the following platforms:
+
+* Linux
+  * amd64
+  * ppc64le
+  * s390x
+  * arm64
+* macOS
+  * amd64
+* Windows
+  * amd64
+
+Other architectures coming soon.
+
 # Documentation
 
 The Doxygen API docs are availble [here](https://cfriedt.github.io/crcx/), or for individual language bindings
