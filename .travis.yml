@@ -32,7 +32,7 @@ matrix:
             - cmake
             - lcov
       env:
-        - MATRIX_EVAL="SUDO=sudo && MAKE=make && OPTS='--enable-code-coverage'"
+        - MATRIX_EVAL="SUDO=sudo && MAKE=make"
     - os: linux
       arch: s390x
       sudo: required
@@ -45,7 +45,7 @@ matrix:
             - cmake
             - lcov
       env:
-        - MATRIX_EVAL="SUDO=sudo && MAKE=make && OPTS='--enable-code-coverage'"
+        - MATRIX_EVAL="SUDO=sudo && MAKE=make"
     - os: linux
       arch: arm64
       sudo: required
@@ -58,16 +58,15 @@ matrix:
             - cmake
             - lcov
       env:
-        - MATRIX_EVAL="SUDO=sudo && MAKE=make && OPTS='--enable-code-coverage --without-doxygen'"
+        - MATRIX_EVAL="SUDO=sudo && MAKE=make"
     - os: osx
       osx_image: xcode11.3
       addons:
         homebrew:
           packages:
             - autoconf-archive
-            - lcov
       env:
-        - MATRIX_EVAL="SUDO=sudo && MAKE=make && OPTS='--enable-code-coverage --without-doxygen'"
+        - MATRIX_EVAL="SUDO=sudo && MAKE=make"
     - os: windows
 
 before_install:
