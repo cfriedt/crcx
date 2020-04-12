@@ -338,29 +338,23 @@ TEST(LibCRC3x, board_example1) {
 TEST(LibCRC3x, nrf_support1) {
   // https://devzone.nordicsemi.com/f/nordic-q-a/679/ble-crc-calculation
 
-  const struct pdu_adv pdu = {
-      .type = ADV_IND,
-      .rfu = 0,
-      .chan_sel = 0,
-      .tx_addr = 0,
-      .rx_addr = 0,
-      .len = 9,
-      .addr =
-          {
-              // note, this is least-significant byte first
-              0x0d,
-              0xef,
-              0x84,
-              0xb7,
-              0x2d,
-              0x3c,
-          },
-      .data =
-          {
-              0x02, 0x01, 0x05, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-              0,    0,    0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-          },
-  };
+  // oddly getting "non-trivial designated initializers not supported" error only on s390x
+  pdu_adv pdu = {};
+  pdu.type = ADV_IND;
+  pdu.len = 9;
+
+  // note, this is least-significant byte first
+  pdu.addr[0] = 0x0d;
+  pdu.addr[1] = 0xef;
+  pdu.addr[2] = 0x84;
+  pdu.addr[3] = 0xb7;
+  pdu.addr[4] = 0x2d;
+  pdu.addr[5] = 0x3c;
+
+  pdu.data[0] = 0x02;
+  pdu.data[1] = 0x01;
+  pdu.data[2] = 0x05;
+
   const size_t pdu_len = PDU_AC_LL_HEADER_SIZE + pdu.len;
 
   using Crc3x = Crc<uint32_t, ble_crc_n, uint32_t(ble_poly)>;
@@ -380,29 +374,24 @@ TEST(LibCRC3x, nrf_support1) {
 TEST(LibCRC3x, ble_core_52_4_2_1_Legacy_Advertising_PDUs) {
   // https://www.bluetooth.com/specifications/bluetooth-core-specification/
 
-  const struct pdu_adv pdu = {
-      .type = ADV_NONCONN_IND,
-      .rfu = 0,
-      .chan_sel = 0,
-      .tx_addr = 1,
-      .rx_addr = 0,
-      .len = 9,
-      .addr =
-          {
-              // note, this is least-significant byte first
-              0xa6,
-              0xa5,
-              0xa4,
-              0xa3,
-              0xa2,
-              0xc1,
-          },
-      .data =
-          {
-              0x01, 0x02, 0x03, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-              0,    0,    0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-          },
-  };
+  // oddly getting "non-trivial designated initializers not supported" error only on s390x
+  pdu_adv pdu = {};
+  pdu.type = ADV_NONCONN_IND;
+  pdu.tx_addr = 1;
+  pdu.len = 9;
+
+  // note, this is least-significant byte first
+  pdu.addr[0] = 0xa6;
+  pdu.addr[1] = 0xa5;
+  pdu.addr[2] = 0xa4;
+  pdu.addr[3] = 0xa3;
+  pdu.addr[4] = 0xa2;
+  pdu.addr[5] = 0xc1;
+
+  pdu.data[0] = 0x01;
+  pdu.data[1] = 0x02;
+  pdu.data[2] = 0x03;
+
   const size_t pdu_len = PDU_AC_LL_HEADER_SIZE + pdu.len;
 
   using Crc3x = Crc<uint32_t, ble_crc_n, uint32_t(ble_poly)>;
