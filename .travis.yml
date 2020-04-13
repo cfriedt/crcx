@@ -14,12 +14,12 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - autoconf-archive
-            - cmake
             - doxygen
             - graphviz
             - lcov
+            - libgtest-dev
       env:
-        - MATRIX_EVAL="SUDO=sudo && MAKE=make && OPTS='--enable-code-coverage'"
+        - MATRIX_EVAL="export SUDO=sudo && export MAKE=make && export OPTS='--enable-code-coverage --with-gtest' && export GTEST_CFLAGS='-I/usr/src/gtest/include' && export GTEST_LIBS='/usr/src/gtest/libgtest.a /usr/src/gtest/libgtest_main.a -lpthread'"
     - os: linux
       arch: ppc64le
       sudo: required
@@ -32,7 +32,7 @@ matrix:
             - cmake
             - lcov
       env:
-        - MATRIX_EVAL="SUDO=sudo && MAKE=make"
+        - MATRIX_EVAL="export SUDO=sudo && export MAKE=make && export OPTS='--with-gtest' && export GTEST_CFLAGS='-I/usr/src/gtest/include' && export GTEST_LIBS='/usr/src/gtest/libgtest.a /usr/src/gtest/libgtest_main.a -lpthread'"
     - os: linux
       arch: s390x
       sudo: required
@@ -45,7 +45,7 @@ matrix:
             - cmake
             - lcov
       env:
-        - MATRIX_EVAL="SUDO=sudo && MAKE=make"
+        - MATRIX_EVAL="export SUDO=sudo && export MAKE=make && export OPTS='--with-gtest' && export GTEST_CFLAGS='-I/usr/src/gtest/include' && export GTEST_LIBS='/usr/src/gtest/libgtest.a /usr/src/gtest/libgtest_main.a -lpthread'"
     - os: linux
       arch: arm64
       sudo: required
@@ -58,7 +58,7 @@ matrix:
             - cmake
             - lcov
       env:
-        - MATRIX_EVAL="SUDO=sudo && MAKE=make"
+        - MATRIX_EVAL="export SUDO=sudo && export MAKE=make && OPTS='--with-gtest' && export GTEST_CFLAGS='-I/usr/src/gtest/include' && export GTEST_LIBS='/usr/src/gtest/libgtest.a /usr/src/gtest/libgtest_main.a -lpthread'"
     - os: osx
       osx_image: xcode11.3
       addons:
@@ -66,7 +66,7 @@ matrix:
           packages:
             - autoconf-archive
       env:
-        - MATRIX_EVAL="SUDO=sudo && MAKE=make"
+        - MATRIX_EVAL="export SUDO=sudo && export MAKE=make"
 #    - os: windows
 
 before_install:
@@ -96,7 +96,7 @@ before_install:
     esac
 
 before_script:
-  - if [ "$TRAVIS_OS_NAME" != "windows" ]; then ${SUDO} sh .scripts/build-and-install-libgtest-libraries.sh; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then ${SUDO} brew tap ros/deps; brew install gtest; fi
 
 script:
   - autoreconf -vfi
@@ -107,7 +107,7 @@ script:
   - # ensure a simple application can compile and link to libcrcx
   - echo 'extern void crcx_init(); int main() { crcx_init(); return 0; }' > foo.c
   - ${CC} -o foo foo.c `pkg-config --cflags --libs crcx`
-  - # ensure a simple application can compile and link to libcrcxxx
+  - # ensure a simple application can compile and link to libcrc3x
   - echo '#include <crc3x/crc3x.h>' > foo.cpp
   - echo 'using namespace ::crc3x; int main() { using Crc3x = Crc<uint8_t,8,7>; Crc3x crc(0,0,false,false); return 0; }' >> foo.cpp
   - ${CXX} -std=c++17 -o foo foo.cpp `pkg-config --cflags --libs crc3x`
