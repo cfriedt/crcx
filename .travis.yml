@@ -67,7 +67,7 @@ matrix:
             - autoconf-archive
       env:
         - MATRIX_EVAL="SUDO=sudo && MAKE=make"
-    - os: windows
+#    - os: windows
 
 before_install:
 - |-
