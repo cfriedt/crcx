@@ -67,7 +67,12 @@ matrix:
             - autoconf-archive
       env:
         - MATRIX_EVAL="SUDO=sudo && MAKE=make"
-#    - os: windows
+    - os: windows
+  allow_failures:
+  - os: windows
+    if: tag IS blank
+  - os: osx
+    if: tag IS blank
 
 before_install:
 - |-
