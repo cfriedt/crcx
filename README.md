@@ -8,17 +8,21 @@
 
 A simple, straightforward [CRC](https://en.wikipedia.org/wiki/Cyclic_redundancy_check) library that uses [lookup-tables](https://en.wikipedia.org/wiki/Lookup_table).
 
-LibCRCx has been tested on the following platforms:
+# Build Status
 
-* Linux
-  * amd64
-  * ppc64le
-  * s390x
-  * arm64
-* macOS
-  * amd64
-* Windows
-  * amd64
+| (OS, Compiler) | amd64            | ppc64le            | s390x            | arm64            |
+|----------------|------------------|--------------------|------------------|------------------|
+| (Linux, gcc)   | [![amd64][2]][1] | [![ppc64le][3]][1] | [![s390x][4]][1] | [![arm64][5]][1] |
+| (macOS, clang) | [![amd64][6]][1] |                    |                  |                  |
+| (Windows, gcc) | [![amd64][7]][1] |                    |                  |                  |
+
+[1]: https://travis-ci.com/cfriedt/crcx
+[2]: https://travis-matrix-badges.herokuapp.com/repos/cfriedt/crcx/branches/master/1?use_travis_com=true
+[3]: https://travis-matrix-badges.herokuapp.com/repos/cfriedt/crcx/branches/master/2?use_travis_com=true
+[4]: https://travis-matrix-badges.herokuapp.com/repos/cfriedt/crcx/branches/master/3?use_travis_com=true
+[5]: https://travis-matrix-badges.herokuapp.com/repos/cfriedt/crcx/branches/master/4?use_travis_com=true
+[6]: https://travis-matrix-badges.herokuapp.com/repos/cfriedt/crcx/branches/master/5?use_travis_com=true
+[7]: https://travis-matrix-badges.herokuapp.com/repos/cfriedt/crcx/branches/master/6?use_travis_com=true
 
 Other architectures coming soon.
 
