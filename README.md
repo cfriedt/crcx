@@ -4,6 +4,7 @@ A simple, straightforward [CRC](https://en.wikipedia.org/wiki/Cyclic_redundancy_
 
 # Code Health
 
+[![Build Status](https://travis-ci.com/cfriedt/crcx.svg?branch=master)](https://travis-ci.com/cfriedt/crcx)
 [![Codecov Status](https://codecov.io/gh/cfriedt/crcx/branch/master/graph/badge.svg)](https://codecov.io/gh/cfriedt/crcx)
 [![Code Quality](https://api.codacy.com/project/badge/Grade/2591b5d32ac84f1897b4a7e8d45d1544)](https://www.codacy.com/app/cfriedt/crcx?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=cfriedt/crcx&amp;utm_campaign=Badge_Grade)
 
