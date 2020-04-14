@@ -1,14 +1,14 @@
-[![Build Status](https://travis-ci.com/cfriedt/crcx.svg?branch=master)](https://travis-ci.com/cfriedt/crcx)
-[![Codecov Status](https://codecov.io/gh/cfriedt/crcx/branch/master/graph/badge.svg)](https://codecov.io/gh/cfriedt/crcx)
-[![Code Quality](https://api.codacy.com/project/badge/Grade/2591b5d32ac84f1897b4a7e8d45d1544)](https://www.codacy.com/app/cfriedt/crcx?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=cfriedt/crcx&amp;utm_campaign=Badge_Grade)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![C++17 Compliant](https://img.shields.io/badge/c%2B%2B17-compliant-blue)](https://en.wikipedia.org/wiki/C%2B%2B17)
-
 # LibCRCx
 
 A simple, straightforward [CRC](https://en.wikipedia.org/wiki/Cyclic_redundancy_check) library that uses [lookup-tables](https://en.wikipedia.org/wiki/Lookup_table).
 
-# Build Status
+# Code Health
+
+[![Codecov Status](https://codecov.io/gh/cfriedt/crcx/branch/master/graph/badge.svg)](https://codecov.io/gh/cfriedt/crcx)
+[![Code Quality](https://api.codacy.com/project/badge/Grade/2591b5d32ac84f1897b4a7e8d45d1544)](https://www.codacy.com/app/cfriedt/crcx?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=cfriedt/crcx&amp;utm_campaign=Badge_Grade)
+[![C++17](https://img.shields.io/badge/c%2B%2B17-compliant-blue)](https://en.wikipedia.org/wiki/C%2B%2B17)
+
+## Build Matrix
 
 | (OS, Compiler) | amd64            | ppc64le            | s390x            | arm64            |
 |----------------|------------------|--------------------|------------------|------------------|
@@ -24,8 +24,6 @@ A simple, straightforward [CRC](https://en.wikipedia.org/wiki/Cyclic_redundancy_
 [6]: https://travis-matrix-badges.herokuapp.com/repos/cfriedt/crcx/branches/master/5?use_travis_com=true
 [7]: https://travis-matrix-badges.herokuapp.com/repos/cfriedt/crcx/branches/master/6?use_travis_com=true
 
-Other architectures coming soon.
-
 # Documentation
 
 The Doxygen API docs are availble [here](https://cfriedt.github.io/crcx/), or for individual language bindings
@@ -35,4 +33,6 @@ The Doxygen API docs are availble [here](https://cfriedt.github.io/crcx/), or fo
 
 # License
 
-See the file [LICENSE](https://github.com/cfriedt/crcx/blob/master/LICENSE) for licensing terms and copyright.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+See the file [LICENSE](https://github.com/cfriedt/crcx/blob/master/LICENSE)
