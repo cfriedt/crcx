@@ -28,8 +28,8 @@ A simple, straightforward [CRC](https://en.wikipedia.org/wiki/Cyclic_redundancy_
 
 The Doxygen API docs are availble [here](https://cfriedt.github.io/crcx/), or for individual language bindings
 
-* [![C](https://img.shields.io/badge/C-11-555555)](https://cfriedt.github.io/crcx/crcx_8h.html)
-* [![C++](https://img.shields.io/badge/C%2B%2B-17-f34b7d)](https://cfriedt.github.io/crcx/crc3x_8h.html)
+* [C](https://cfriedt.github.io/crcx/crcx_8h.html)
+* [C++](https://cfriedt.github.io/crcx/crc3x_8h.html)
 
 # License
 
