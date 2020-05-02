@@ -165,8 +165,8 @@ bool crcx_generate_table(struct crcx_ctx *ctx) {
 
 #define SET(t, k, v) *((t *)(&(k))) = (v)
 
-bool crcx_init(struct crcx_ctx *ctx, uint8_t n, uintmax_t init, uintmax_t fini,
-               uintmax_t poly, bool reflect_input, bool reflect_output) {
+bool crcx_init(struct crcx_ctx *ctx, uint8_t n, uintmax_t poly, uintmax_t init,
+               uintmax_t fini, bool reflect_input, bool reflect_output) {
 
   SET(uint8_t, ctx->n, n);
   SET(uintmax_t, ctx->poly, poly);

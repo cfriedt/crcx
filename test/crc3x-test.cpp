@@ -338,7 +338,8 @@ TEST(LibCRC3x, board_example1) {
 TEST(LibCRC3x, nrf_support1) {
   // https://devzone.nordicsemi.com/f/nordic-q-a/679/ble-crc-calculation
 
-  // oddly getting "non-trivial designated initializers not supported" error only on s390x
+  // oddly getting "non-trivial designated initializers not supported" error
+  // only on s390x
   pdu_adv pdu = {};
   pdu.type = ADV_IND;
   pdu.len = 9;
@@ -374,7 +375,8 @@ TEST(LibCRC3x, nrf_support1) {
 TEST(LibCRC3x, ble_core_52_4_2_1_Legacy_Advertising_PDUs) {
   // https://www.bluetooth.com/specifications/bluetooth-core-specification/
 
-  // oddly getting "non-trivial designated initializers not supported" error only on s390x
+  // oddly getting "non-trivial designated initializers not supported" error
+  // only on s390x
   pdu_adv pdu = {};
   pdu.type = ADV_NONCONN_IND;
   pdu.tx_addr = 1;
