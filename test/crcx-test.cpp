@@ -232,7 +232,7 @@ TEST(LibCRCx, Wikipedia_example1) {
 
   ::crcx_ctx ctx = {};
 
-  ASSERT_TRUE(::crcx_init(&ctx, 8, 0, 0, 0b100000111, false, false));
+  ASSERT_TRUE(::crcx_init(&ctx, 8, 0b100000111, 0, 0, false, false));
 
   ASSERT_EQ(ctx.n, 8);
   ASSERT_EQ(ctx.msb, 0x80);
@@ -292,7 +292,7 @@ TEST(LibCRCx, Sunshine_CRC8) {
                              0x36, 0x37, 0x38, 0x39};
 
   ::crcx_ctx ctx = {};
-  ASSERT_TRUE(::crcx_init(&ctx, 8, 0, 0, 0x07, false, false));
+  ASSERT_TRUE(::crcx_init(&ctx, 8, 0x07, 0, 0, false, false));
 
   ASSERT_TRUE(::crcx(&ctx, &data.front(), data.size()));
 
@@ -318,7 +318,7 @@ TEST(LibCRCx, Sunshine_CRC8_ITU) {
                              0x36, 0x37, 0x38, 0x39};
 
   ::crcx_ctx ctx = {};
-  ASSERT_TRUE(::crcx_init(&ctx, 8, 0, 0x55, 0x07, false, false));
+  ASSERT_TRUE(::crcx_init(&ctx, 8, 0x07, 0, 0x55, false, false));
 
   ASSERT_TRUE(::crcx(&ctx, &data.front(), data.size()));
 
@@ -344,7 +344,7 @@ TEST(LibCRCx, Sunshine_CRC8_DARC) {
                              0x36, 0x37, 0x38, 0x39};
 
   ::crcx_ctx ctx = {};
-  ASSERT_TRUE(::crcx_init(&ctx, 8, 0, 0, 0x39, true, true));
+  ASSERT_TRUE(::crcx_init(&ctx, 8, 0x39, 0, 0, true, true));
 
   ASSERT_TRUE(::crcx(&ctx, &data.front(), data.size()));
 
@@ -369,7 +369,7 @@ TEST(LibCRCx, Sunshine_CRC16_CCIT_ZERO_one_byte) {
   const vector<uint8_t> data{uint8_t('W')};
 
   ::crcx_ctx ctx = {};
-  ASSERT_TRUE(::crcx_init(&ctx, 16, 0, 0, 0x1021, false, false));
+  ASSERT_TRUE(::crcx_init(&ctx, 16, 0x1021, 0, 0, false, false));
 
   ASSERT_EQ(ctx.n, 16);
   ASSERT_EQ(ctx.msb, 0x8000);
@@ -438,7 +438,7 @@ TEST(LibCRCx, Sunshine_CRC16_CCIT_ZERO_incremental) {
   // checking intermediate values.
 
   // the lfsr value is now 0, then, 0x2672, 0x20b5, ...
-  ASSERT_TRUE(::crcx_init(&ctx, 16, 0, 0, 0x1021, false, false));
+  ASSERT_TRUE(::crcx_init(&ctx, 16, 0x1021, 0, 0, false, false));
 
   ASSERT_TRUE(data.size() == expected.size());
   for (size_t i = 0; i < data.size(); ++i) {
@@ -468,7 +468,7 @@ TEST(LibCRCx, Sunshine_CRC16_CCIT_ZERO) {
                              0x36, 0x37, 0x38, 0x39};
 
   ::crcx_ctx ctx = {};
-  ASSERT_TRUE(::crcx_init(&ctx, 16, 0, 0, 0x1021, false, false));
+  ASSERT_TRUE(::crcx_init(&ctx, 16, 0x1021, 0, 0, false, false));
 
   // clang-format off
     auto expected_v = to_vector(
@@ -518,7 +518,7 @@ TEST(LibCRCx, Sunshine_CRC32_POSIX) {
                              0x36, 0x37, 0x38, 0x39};
 
   ::crcx_ctx ctx = {};
-  ASSERT_TRUE(::crcx_init(&ctx, 32, 0, -1, 0x4c11db7, false, false));
+  ASSERT_TRUE(::crcx_init(&ctx, 32, 0x4c11db7, 0, -1, false, false));
 
   // clang-format off
     auto expected_v = to_vector(
@@ -584,7 +584,7 @@ TEST(LibCRCx, Sunshine_CRC64_ECMA_182) {
                              0x36, 0x37, 0x38, 0x39};
 
   ::crcx_ctx ctx = {};
-  ASSERT_TRUE(::crcx_init(&ctx, 64, 0, 0, 0x42F0E1EBA9EA3693, false, false));
+  ASSERT_TRUE(::crcx_init(&ctx, 64, 0x42F0E1EBA9EA3693, 0, 0, false, false));
 
   // clang-format off
     auto expected_v = to_vector(
@@ -724,7 +724,7 @@ TEST(LibCRCx, board_example1) {
   const uint32_t wireshark_crc(0x0801bd);
 
   ::crcx_ctx ctx = {};
-  ASSERT_TRUE(::crcx_init(&ctx, ble_crc_n, ble_init, ble_fini, ble_poly,
+  ASSERT_TRUE(::crcx_init(&ctx, ble_crc_n, ble_poly, ble_init, ble_fini,
                           ble_reflect_input, ble_reflect_output));
   ASSERT_TRUE(::crcx(&ctx, data, len));
   uintmax_t sw_crc = ::crcx_fini(&ctx);
@@ -739,7 +739,8 @@ TEST(LibCRCx, board_example1) {
 TEST(LibCRCx, nrf_support1) {
   // https://devzone.nordicsemi.com/f/nordic-q-a/679/ble-crc-calculation
 
-  // oddly getting "non-trivial designated initializers not supported" error only on s390x
+  // oddly getting "non-trivial designated initializers not supported" error
+  // only on s390x
   pdu_adv pdu = {};
   pdu.type = ADV_IND;
   pdu.len = 9;
@@ -759,7 +760,7 @@ TEST(LibCRCx, nrf_support1) {
   const size_t pdu_len = PDU_AC_LL_HEADER_SIZE + pdu.len;
 
   ::crcx_ctx ctx = {};
-  ASSERT_TRUE(::crcx_init(&ctx, ble_crc_n, ble_init, ble_fini, ble_poly,
+  ASSERT_TRUE(::crcx_init(&ctx, ble_crc_n, ble_poly, ble_init, ble_fini,
                           ble_reflect_input, ble_reflect_output));
   ASSERT_TRUE(::crcx(&ctx, &pdu, pdu_len));
   uintmax_t expected_uintmax = ::crcx_reflect(0xa4e2c2, ctx.n);
@@ -774,7 +775,8 @@ TEST(LibCRCx, nrf_support1) {
 TEST(LibCRCx, ble_core_52_4_2_1_Legacy_Advertising_PDUs) {
   // https://www.bluetooth.com/specifications/bluetooth-core-specification/
 
-  // oddly getting "non-trivial designated initializers not supported" error only on s390x
+  // oddly getting "non-trivial designated initializers not supported" error
+  // only on s390x
   pdu_adv pdu = {};
   pdu.type = ADV_NONCONN_IND;
   pdu.tx_addr = 1;
@@ -795,7 +797,7 @@ TEST(LibCRCx, ble_core_52_4_2_1_Legacy_Advertising_PDUs) {
   const size_t pdu_len = PDU_AC_LL_HEADER_SIZE + pdu.len;
 
   ::crcx_ctx ctx = {};
-  ASSERT_TRUE(::crcx_init(&ctx, ble_crc_n, ble_init, ble_fini, ble_poly,
+  ASSERT_TRUE(::crcx_init(&ctx, ble_crc_n, ble_poly, ble_init, ble_fini,
                           ble_reflect_input, ble_reflect_output));
   ASSERT_TRUE(::crcx(&ctx, &pdu, pdu_len));
   uintmax_t expected_uintmax = 0xb52dd7;

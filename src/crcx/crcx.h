@@ -37,7 +37,7 @@
  *   struct crcx_ctx ctx = {};
  *   // Initialize an 8-bit CRC with no initializer or finalizer, where
  *   // neither the input or output is reflected (in that order).
- *   crcx_init(&ctx, 8, 0, 0, 0x07, false, false);
+ *   crcx_init(&ctx, 8, 0x07, 0, 0, false, false);
  *   crcx(&ctx, data, sizeof(data));
  *   uintmax_t crc = crcx_fini(&ctx);
  *   // The value of crc should be 0xa2.
@@ -128,17 +128,17 @@ bool crcx_generate_table(struct crcx_ctx *ctx);
  *
  * @param ctx             the CRC context to initialize
  * @param n               number of bits in CRC. For E.g. CRC-8 use 8.
+ * @param poly            the polynomial used for CRC calculations
  * @param init            initial value stored in the @ref crcx_ctx.lfsr
  * @param fini            final value xor'ed with the @ref crcx_ctx.lfsr
- * @param poly            the polynomial used for CRC calculations
  * @param reflect_input   perform a bitwise reversal of each input byte
  * @param reflect_output  perform a bitwise reversal of the result of the CRC
  * calculation
  *
  * @return true on success, otherwise false
  */
-bool crcx_init(struct crcx_ctx *ctx, uint8_t n, uintmax_t init, uintmax_t fini,
-               uintmax_t poly, bool reflect_input, bool reflect_output);
+bool crcx_init(struct crcx_ctx *ctx, uint8_t n, uintmax_t poly, uintmax_t init,
+               uintmax_t fini, bool reflect_input, bool reflect_output);
 
 /**
  * Finalize a CRC context
