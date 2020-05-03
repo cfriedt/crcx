@@ -146,8 +146,77 @@ before_install:
         taskkill //IM gpg-agent.exe //F  # https://travis-ci.community/t/4967
         export PATH=/C/tools/msys64/mingw64/bin:$PATH
         export MAKE=mingw32-make  # so that Autotools can find it
+
+        #
+        # https://travis-ci.community/t/autoconf-automake/964/4
+        #
+        
+        wget -nv https://master.dl.sourceforge.net/project/mingw/MSYS/Base/msys-core/msys-1.0.19-1/msysCORE-1.0.19-1-msys-1.0.19-bin.tar.xz
+        wget -nv https://master.dl.sourceforge.net/project/mingw/MSYS/Extension/m4/m4-1.4.16-2/m4-1.4.16-2-msys-1.0.17-bin.tar.lzma
+
+        mkdir /mingw
+        xz -d msysCORE-1.0.19-1-msys-1.0.19-bin.tar.xz
+        tar -C /mingw -xf msysCORE-1.0.19-1-msys-1.0.19-bin.tar
+
+        xz -d  m4-1.4.16-2-msys-1.0.17-bin.tar.lzma
+        tar -C /mingw -xf m4-1.4.16-2-msys-1.0.17-bin.tar
+
+        # Msys autoconf, automake, libtool
+
+        +wget -nv https://master.dl.sourceforge.net/project/mingw/MinGW/Extension/autoconf/autoconf2.5/autoconf2.5-2.68-1/autoconf2.5-2.68-1-mingw32-bin.tar.lzma
+        wget -nv https://master.dl.sourceforge.net/project/mingw/MinGW/Extension/automake/automake1.11/automake1.11-1.11.1-1/automake1.11-1.11.1-1-mingw32-bin.tar.lzma
+        wget -nv https://master.dl.sourceforge.net/project/mingw/MinGW/Extensionlibtool/libtool-2.4-1/libtool-2.4-1-mingw32-bin.tar.lzma
+
+        xz -d autoconf2.5-2.68-1-mingw32-bin.tar.lzma
+        xz -d automake1.11-1.11.1-1-mingw32-bin.tar.lzma
+        xz -d libtool-2.4-1-mingw32-bin.tar.lzma
+
+        tar -C /mingw -xf autoconf2.5-2.68-1-mingw32-bin.tar
+        tar -C /mingw -xf automake1.11-1.11.1-1-mingw32-bin.tar
+        tar -C /mingw -xf libtool-2.4-1-mingw32-bin.tar
+
+        # Add aliases to standard names
+        ln -sf /mingw/bin/aclocal-1.11 /mingw/bin/aclocal
+        ln -sf /mingw/bin/automake-1.11 /mingw/bin/automake
+        ln -sf /mingw/bin/autoconf-2.68 /mingw/bin/autoconf
+        ln -sf /mingw/bin/autoheader-2.68 /mingw/bin/autoheader
+        ln -sf /mingw/bin/autom4te-2.68 /mingw/bin/autom4te
+        ln -sf /mingw/bin/autoreconf-2.68 /mingw/bin/autoreconf
+        ln -sf /mingw/bin/autoscan-2.68 /mingw/bin/autoscan
+        ln -sf /mingw/bin/autoupdate-2.68 /mingw/bin/autoupdate
+        ln -sf /mingw/bin/ifnames-2.68 /mingw/bin/ifnames
+        ln -sf /mingw/bin/m4 /usr/bin/m4
+
+        # Fix the environment for autotools to actually work
+        ln -s /c/tools/msys64/usr/share/autoconf* /usr/share/
+        ln -s /c/tools/msys64/usr/share/automake* /usr/share/
+        ln -s /c/tools/msys64/usr/share/aclocal* /usr/share/
+        ln -s /c/tools/msys64/usr/share/libtool* /usr/share/
+        ln -s /c/tools/msys64/usr/share/pkgconfig /usr/share/
+        ln -s /c/tools/msys64/usr/bin/autom4te /usr/bin/
+        ln -s /c/tools/msys64/usr/bin/autoconf /usr/bin/
+        ln -s /c/tools/msys64/usr/bin/autoheader /usr/bin/
+        ln -s /c/tools/msys64/usr/bin/m4 /usr/bin/
+
+        PATH=$PATH:/c/tools/msys64/usr/bin/
+        export CONFIG_SHELL=/usr/bin/bash.exe
+        export PATH=/c/tools/msys64/usr/bin/:$PATH
         ;;
     esac
+
+before_cache:
+- |-
+    case $TRAVIS_OS_NAME in
+      windows)
+        # https://unix.stackexchange.com/a/137322/107554
+        $msys2 pacman --sync --clean --noconfirm
+        ;;
+    esac
+
+cache:
+    directories:
+    - $HOME/AppData/Local/Temp/chocolatey
+    - /C/tools/msys64
 
 before_script:
   - if [ "$TRAVIS_OS_NAME" != "windows" ]; then ${SUDO} sh .scripts/build-and-install-libgtest-libraries.sh; fi
