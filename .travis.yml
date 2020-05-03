@@ -56,15 +56,6 @@ matrix:
             - cmake
       env:
         - MATRIX_EVAL="SUDO=sudo && MAKE=make && CC=gcc && CXX=g++ && CFLAGS='-Wall -Wextra -Werror' && CXXFLAGS='-Wall -Wextra -Werror'"
-    - os: osx
-      osx_image: xcode11.3
-      addons:
-        homebrew:
-          packages:
-            - autoconf-archive
-      env:
-        - MATRIX_EVAL="SUDO=sudo && MAKE=make"
-    - os: windows
     - os: linux
       arch: amd64
       sudo: required
@@ -117,6 +108,15 @@ matrix:
             - clang
       env:
         - MATRIX_EVAL="SUDO=sudo && MAKE=make && CC=clang && CXX=clang++ && CFLAGS='-Wall -Wextra -Werror' && CXXFLAGS='-Wall -Wextra -Werror'"
+    - os: osx
+      osx_image: xcode11.3
+      addons:
+        homebrew:
+          packages:
+            - autoconf-archive
+      env:
+        - MATRIX_EVAL="SUDO=sudo && MAKE=make"
+    - os: windows
   allow_failures:
   - os: windows
     if: tag IS blank
