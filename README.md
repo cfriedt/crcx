@@ -10,11 +10,12 @@ A simple, straightforward [CRC](https://en.wikipedia.org/wiki/Cyclic_redundancy_
 
 ## Build Matrix
 
-| (OS, Compiler) | amd64            | ppc64le            | s390x            | arm64            |
-|----------------|------------------|--------------------|------------------|------------------|
-| (Linux, gcc)   | [![amd64][2]][1] | [![ppc64le][3]][1] | [![s390x][4]][1] | [![arm64][5]][1] |
-| (macOS, clang) | [![amd64][6]][1] |                    |                  |                  |
-| (Windows, gcc) | [![amd64][7]][1] |                    |                  |                  |
+| (OS, Compiler) | amd64            | ppc64le            | s390x             | arm64             |
+|----------------|------------------|--------------------|-------------------|-------------------|
+| (Linux, gcc)   | [![amd64][2]][1] | [![ppc64le][3]][1] | [![s390x][4]][1]  | [![arm64][5]][1]  |
+| (Linux, clang) | [![amd64][8]][1] | [![ppc64le][9]][1] | [![s390x][10]][1] | [![arm64][11]][1] |
+| (macOS, clang) | [![amd64][6]][1] |                    |                   |                   |
+| (Windows, gcc) | [![amd64][7]][1] |                    |                   |                   |
 
 [1]: https://travis-ci.com/cfriedt/crcx
 [2]: https://travis-matrix-badges.herokuapp.com/repos/cfriedt/crcx/branches/master/1?use_travis_com=true
@@ -23,6 +24,10 @@ A simple, straightforward [CRC](https://en.wikipedia.org/wiki/Cyclic_redundancy_
 [5]: https://travis-matrix-badges.herokuapp.com/repos/cfriedt/crcx/branches/master/4?use_travis_com=true
 [6]: https://travis-matrix-badges.herokuapp.com/repos/cfriedt/crcx/branches/master/5?use_travis_com=true
 [7]: https://travis-matrix-badges.herokuapp.com/repos/cfriedt/crcx/branches/master/6?use_travis_com=true
+[8]: https://travis-matrix-badges.herokuapp.com/repos/cfriedt/crcx/branches/master/7?use_travis_com=true
+[9]: https://travis-matrix-badges.herokuapp.com/repos/cfriedt/crcx/branches/master/8?use_travis_com=true
+[10]: https://travis-matrix-badges.herokuapp.com/repos/cfriedt/crcx/branches/master/9?use_travis_com=true
+[11]: https://travis-matrix-badges.herokuapp.com/repos/cfriedt/crcx/branches/master/10?use_travis_com=true
 
 # Documentation
 

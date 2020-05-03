@@ -719,8 +719,6 @@ TEST(LibCRCx, board_example1) {
 
   size_t len = offs;
 
-  const size_t pdu_len = PDU_AC_LL_HEADER_SIZE + len;
-
   const uint32_t wireshark_crc(0x0801bd);
 
   ::crcx_ctx ctx = {};

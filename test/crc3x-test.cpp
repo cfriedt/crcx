@@ -319,8 +319,6 @@ TEST(LibCRC3x, board_example1) {
 
   size_t len = offs;
 
-  const size_t pdu_len = PDU_AC_LL_HEADER_SIZE + len;
-
   const uint32_t wireshark_crc(0x0801bd);
 
   using Crc3x = Crc<uint32_t, ble_crc_n, uint32_t(ble_poly)>;
