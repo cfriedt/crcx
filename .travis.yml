@@ -19,7 +19,7 @@ matrix:
             - graphviz
             - lcov
       env:
-        - MATRIX_EVAL="SUDO=sudo && MAKE=make && OPTS='--enable-code-coverage'"
+        - MATRIX_EVAL="SUDO=sudo && MAKE=make && CC=gcc && CXX=g++ && CFLAGS='-Wall -Wextra -Werror' && CXXFLAGS='-Wall -Wextra -Werror'"
     - os: linux
       arch: ppc64le
       sudo: required
@@ -30,9 +30,8 @@ matrix:
           packages:
             - autoconf-archive
             - cmake
-            - lcov
       env:
-        - MATRIX_EVAL="SUDO=sudo && MAKE=make"
+        - MATRIX_EVAL="SUDO=sudo && MAKE=make && CC=gcc && CXX=g++ && CFLAGS='-Wall -Wextra -Werror' && CXXFLAGS='-Wall -Wextra -Werror'"
     - os: linux
       arch: s390x
       sudo: required
@@ -43,9 +42,8 @@ matrix:
           packages:
             - autoconf-archive
             - cmake
-            - lcov
       env:
-        - MATRIX_EVAL="SUDO=sudo && MAKE=make"
+        - MATRIX_EVAL="SUDO=sudo && MAKE=make && CC=gcc && CXX=g++ && CFLAGS='-Wall -Wextra -Werror' && CXXFLAGS='-Wall -Wextra -Werror'"
     - os: linux
       arch: arm64
       sudo: required
@@ -56,9 +54,8 @@ matrix:
           packages:
             - autoconf-archive
             - cmake
-            - lcov
       env:
-        - MATRIX_EVAL="SUDO=sudo && MAKE=make"
+        - MATRIX_EVAL="SUDO=sudo && MAKE=make && CC=gcc && CXX=g++ && CFLAGS='-Wall -Wextra -Werror' && CXXFLAGS='-Wall -Wextra -Werror'"
     - os: osx
       osx_image: xcode11.3
       addons:
@@ -68,6 +65,58 @@ matrix:
       env:
         - MATRIX_EVAL="SUDO=sudo && MAKE=make"
     - os: windows
+    - os: linux
+      arch: amd64
+      sudo: required
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - autoconf-archive
+            - cmake
+            - clang
+      env:
+        - MATRIX_EVAL="SUDO=sudo && MAKE=make && CC=clang && CXX=clang++ && CFLAGS='-Wall -Wextra -Werror' && CXXFLAGS='-Wall -Wextra -Werror'"
+    - os: linux
+      arch: ppc64le
+      sudo: required
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - autoconf-archive
+            - cmake
+            - clang
+      env:
+        - MATRIX_EVAL="SUDO=sudo && MAKE=make && CC=clang && CXX=clang++ && CFLAGS='-Wall -Wextra -Werror' && CXXFLAGS='-Wall -Wextra -Werror'"
+    - os: linux
+      arch: s390x
+      sudo: required
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - autoconf-archive
+            - cmake
+            - clang
+      env:
+        - MATRIX_EVAL="SUDO=sudo && MAKE=make && CC=clang && CXX=clang++ && CFLAGS='-Wall -Wextra -Werror' && CXXFLAGS='-Wall -Wextra -Werror'"
+    - os: linux
+      arch: arm64
+      sudo: required
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - autoconf-archive
+            - cmake
+            - clang
+      env:
+        - MATRIX_EVAL="SUDO=sudo && MAKE=make && CC=clang && CXX=clang++ && CFLAGS='-Wall -Wextra -Werror' && CXXFLAGS='-Wall -Wextra -Werror'"
   allow_failures:
   - os: windows
     if: tag IS blank
