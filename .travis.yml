@@ -122,49 +122,50 @@ matrix:
     if: tag IS blank
   - os: osx
     if: tag IS blank
+  - arch: ppcle64
+    if: tag IS blank
+  - arch: s390x
+    if: tag IS blank
+  - arch: arm64
+    if: tag IS blank
 
 before_install:
+  - eval "${MATRIX_EVAL}"
+
+before_script:
 - |-
     case $TRAVIS_OS_NAME in
-      linux)
-        eval "${MATRIX_EVAL}"
-        ;;
-      osx)
-        eval "${MATRIX_EVAL}"
+      linux|osx)
+        sudo sh .scripts/build-and-install-libgtest-libraries.sh
         ;;
       windows)
-        [[ ! -f C:/tools/msys64/msys2_shell.cmd ]] && rm -rf C:/tools/msys64
-        choco uninstall -y mingw
-        choco upgrade --no-progress -y msys2
-        export msys2='cmd //C RefreshEnv.cmd '
-        export msys2+='& set MSYS=winsymlinks:nativestrict '
-        export msys2+='& C:\\tools\\msys64\\msys2_shell.cmd -defterm -no-start'
-        export mingw64="$msys2 -mingw64 -full-path -here -c "\"\$@"\" --"
-        export msys2+=" -msys2 -c "\"\$@"\" --"
-        $msys2 pacman --sync --noconfirm --needed mingw-w64-x86_64-toolchain
-        ## Install more MSYS2 packages from https://packages.msys2.org/base here
-        taskkill //IM gpg-agent.exe //F  # https://travis-ci.community/t/4967
-        export PATH=/C/tools/msys64/mingw64/bin:$PATH
-        export MAKE=mingw32-make  # so that Autotools can find it
+        export PATH="${PATH}:/c/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/MSBuild/15.0/Bin"
         ;;
     esac
 
-before_script:
-  - if [ "$TRAVIS_OS_NAME" != "windows" ]; then ${SUDO} sh .scripts/build-and-install-libgtest-libraries.sh; fi
-
 script:
-  - autoreconf -vfi
-  - ./configure ${OPTS}
-  - make -j`nproc --all`
-  - make check
-  - ${SUDO} ${MAKE} -j`nproc --all` install
-  - # ensure a simple application can compile and link to libcrcx
-  - echo 'extern void crcx_init(); int main() { crcx_init(); return 0; }' > foo.c
-  - ${CC} -o foo foo.c `pkg-config --cflags --libs crcx`
-  - # ensure a simple application can compile and link to libcrcxxx
-  - echo '#include <crc3x/crc3x.h>' > foo.cpp
-  - echo 'using namespace ::crc3x; int main() { using Crc3x = Crc<uint8_t,8,7>; Crc3x crc(0,0,false,false); return 0; }' >> foo.cpp
-  - ${CXX} -std=c++17 -o foo foo.cpp `pkg-config --cflags --libs crc3x`
+- |-
+    case $TRAVIS_OS_NAME in
+      linux|osx)
+        eval "${MATRIX_EVAL}"
+        autoreconf -vfi
+        ./configure ${OPTS}
+        make -j`nproc --all`
+        make check
+        ${SUDO} ${MAKE} -j`nproc --all` install
+        # ensure a simple application can compile and link to libcrcx
+        echo 'extern void crcx_init(); int main() { crcx_init(); return 0; }' > foo.c
+        ${CC} -o foo foo.c `pkg-config --cflags --libs crcx`
+        # ensure a simple application can compile and link to libcrc3x
+        echo '#include <crc3x/crc3x.h>' > foo.cpp
+        echo 'using namespace ::crc3x; int main() { using Crc3x = Crc<uint8_t,8,7>; Crc3x crc(0,0,false,false); return 0; }' >> foo.cpp
+        ${CXX} -std=c++17 -o foo foo.cpp `pkg-config --cflags --libs crc3x`
+        ;;
+      windows)
+        cmake .
+        msbuild.exe crcx.sln
+        ;;
+    esac
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)

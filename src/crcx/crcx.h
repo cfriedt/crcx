@@ -53,7 +53,11 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#ifdef _MSC_VER
+#include <crcx/_cdefs.h>
+#else
 #include <sys/cdefs.h>
+#endif
 
 __BEGIN_DECLS
 
@@ -164,7 +168,7 @@ uintmax_t crcx_fini(struct crcx_ctx *ctx);
  * @param ctx   the CRC context to update
  * @param data  the data for which the CRC should be updated
  */
-void crcx_update(struct crcx_ctx *ctx, const uint8_t data);
+void crcx_update(struct crcx_ctx *ctx, uint8_t data);
 
 /**
  * Compute the CRC
