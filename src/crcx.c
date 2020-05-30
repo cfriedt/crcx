@@ -29,10 +29,16 @@
 
 #include "crcx/crcx.h"
 
-#ifndef ARRAY_SIZE
-#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
+#ifdef _MSC_VER
+#include <intrin.h>
+#ifdef _M_AMD64
+#define __builtin_clzll(x) __lzcnt64((unsigned __int64)x)
+#elif _M_IX86
+#define __builtin_clzll(x) __lzcnt((unsigned __int32)x)
+#else
+#error "Unhandled processor"
 #endif
-
+#endif /* _MSC_VER */
 #ifndef MAX
 #define MAX(a, b) ((a) >= (b) ? (a) : (b))
 #endif
@@ -43,10 +49,10 @@
 
 #if defined(DEBUG)
 #include <stdio.h>
-#define D(fmt, args...)                                                        \
-  printf("%s(): %d: " fmt "\n", __func__, __LINE__, ##args)
+#define D(fmt, ...)                                                            \
+  printf("%s(): %d: " fmt "\n", __func__, __LINE__, __VA_ARGS__)
 #else
-#define D(fmt, args...)
+#define D(fmt, ...)
 #endif
 
 #if defined(DEBUG)
@@ -127,7 +133,7 @@ bool crcx_valid(const struct crcx_ctx *ctx) {
 
   // highest bit pos (0-indexed). depends on poly not being zero
   const uint8_t highest_bit_pos =
-      8 * sizeof(uintmax_t) - __builtin_clzll(ctx->poly) - 1;
+      (uint8_t)(8 * sizeof(uintmax_t) - __builtin_clzll(ctx->poly) - 1);
   if (ctx->n < highest_bit_pos) {
     D("invalid polynomial %" PRIxMAX " for an %u-bit CRC", ctx->poly, ctx->n);
     return false;
@@ -214,11 +220,11 @@ void crcx_update(struct crcx_ctx *ctx, uint8_t data) {
 
   if (ctx->reflect_input) {
     D("reflecting: %02x => %02x", data, (uint8_t)crcx_reflect(data, 8));
-    data = crcx_reflect(data, 8);
+    data = (uint8_t)crcx_reflect(data, 8);
   }
 
   // https://en.wikipedia.org/wiki/Computation_of_cyclic_redundancy_checks#Multi-bit_computation
-  uint8_t upper_byte = (ctx->lfsr >> (ctx->n - 8));
+  uint8_t upper_byte = (uint8_t)(ctx->lfsr >> (ctx->n - 8));
   uint8_t idx = data ^ upper_byte;
 
   ctx->lfsr <<= 8;
