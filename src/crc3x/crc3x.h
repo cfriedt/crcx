@@ -266,17 +266,26 @@ public:
    * This function xor's the @p Crc.lfsr with the value specified by @p
    * Crc.finalizer.
    *
-   * This function reflects the input data if specified by @p Crc.reflectInput.
+   * This function reflects the output if specified by @p Crc.reflectOutput.
+   * 
+   * This function also re-initializes the @p Crc.lfsr with the value
+   * specified by @p Crc.initializer.
+   * 
+   * @return The result of the CRC algorithm
    */
   T fini() {
+    T result;
     lfsr ^= finalizer;
     lfsr &= generator<T, N, polynomial>::mask();
 
     if (reflectOutput) {
-      return reflect(lfsr, N);
+      result = reflect(lfsr, N);
     } else {
-      return lfsr;
+      result = lfsr;
     }
+
+    lfsr = initializer;
+    return result;
   }
 
 protected:
