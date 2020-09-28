@@ -174,7 +174,8 @@ void crcx_update(struct crcx_ctx *ctx, uint8_t data);
  * Compute the CRC
  *
  * This function should be called after @ref crcx_init and before @ref
- * crcx_fini.
+ * crcx_fini. Or, if performing multiple successive CRC calculations, it
+ * can be called again after @ref crcx_fini.
  *
  * It validates input with @ref crcx_valid and then calls @ref crcx_update
  * @p len times, once for each item in @p data.

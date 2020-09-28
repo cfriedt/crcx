@@ -199,6 +199,7 @@ bool crcx_init(struct crcx_ctx *ctx, uint8_t n, uintmax_t poly, uintmax_t init,
 }
 
 uintmax_t crcx_fini(struct crcx_ctx *ctx) {
+  uintmax_t r;
 
   if (!crcx_valid(ctx)) {
     return -1;
@@ -213,7 +214,10 @@ uintmax_t crcx_fini(struct crcx_ctx *ctx) {
     D("lfsr: %" PRIxMAX, ctx->lfsr);
   }
 
-  return ctx->lfsr;
+  r = ctx->lfsr;
+  ctx->lfsr = ctx->init;
+
+  return r;
 }
 
 void crcx_update(struct crcx_ctx *ctx, uint8_t data) {
