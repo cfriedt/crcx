@@ -406,3 +406,65 @@ TEST(LibCRC3x, ble_core_52_4_2_1_Legacy_Advertising_PDUs) {
       << "expected: " << hex << setw(6) << setfill('0') << expected << " "
       << "actual: " << hex << setw(6) << setfill('0') << actual << " ";
 }
+
+// see https://tools.ietf.org/html/rfc1662
+
+// The table in rfc1662 is "reflected", using the terminology of 
+// http://www.sunshine2k.de/coding/javascript/crc/crc_js.html
+
+// Currently, CRCx does not use reflected tables
+// It is likely far more computationally efficient to do so when bits should be processed MSB first.
+
+// At risk of generalizing, it would seem to be the case that using "reflected tables" is an optimization
+// that avoids having to reflect input bits and reflect output bits.
+
+// A side effect of not using reflected tables seems to be that the check at the end becoes zero
+// instead of 0xf0b8.
+
+constexpr size_t hdlc_crc_n = 16;
+constexpr uint16_t hdlc_poly = 0x1021;
+constexpr uint16_t hdlc_init = 0xffff;
+constexpr uint16_t hdlc_check = 0; // 0xf0b8 <-- only when using "reflected tables"
+constexpr uint16_t hdlc_fini = 0;
+constexpr bool hdlc_reflect_input = true;
+constexpr bool hdlc_reflect_output = true;
+
+TEST(LibCRC3x, rfc1662_fcs16) {
+  // https://tools.ietf.org/html/rfc1662
+
+  // Created using the example code in Section C.2 of the above RFC
+  // with the string "Hello, HDLC world!"
+  // With HDLC, the first step is to calculate the CRC of the message using the initializer 0xffff.
+  // That results in the CRC-16 0x0530.
+  // Then, append the CRC to the message (MSB first).
+  // Then, every received message can be verified against the constant 0xf0b8
+  // When using the same algorithm and table shown in the RFC, that can all be verified to work fine.
+  string msg = "Hello, HDLC world!";
+  vector<uint8_t> data(msg.begin(), msg.end());
+  uint16_t fcs = 0x0530;
+
+  // first, let's verify that we can get the same crc by *not* using the algorithm and table in rfc1662
+  using Crc3x = Crc<uint16_t, hdlc_crc_n, hdlc_poly>;
+
+  Crc3x crc(hdlc_init, hdlc_fini, hdlc_reflect_input, hdlc_reflect_output);
+
+  crc.update(data.begin(), data.end());
+
+  auto expected = fcs;
+  auto actual = crc.fini();
+
+  ASSERT_EQ(actual, expected) << "The calculated CRC is incorrect";
+
+  data.push_back(fcs);
+  data.push_back(fcs >> 8);
+
+  crc.update(data.begin(), data.end());
+
+  // a side-effect of *not* using "reflected tables" is that input & output must be reflected
+  // which is computationally expensive, and also that the check at the end is no longer 0xf0b8 but 0.
+
+  expected = hdlc_check;
+  actual = crc.fini();
+
+  EXPECT_EQ(actual, expected) << "HDLC check failed";
+}
